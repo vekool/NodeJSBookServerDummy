@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angular Book Server - API Documentation</title>
+    <link rel="stylesheet" href="notes-template.css">
+</head>
+<body>
+    <h1>📚 Angular Book Server - API Documentation</h1>
+    
+    <p><strong>Base URL:</strong> <code>http://localhost:3001</code></p>
+    <p><strong>Version:</strong> 2.0.0</p>
+    
+    <blockquote>
+        <p>A comprehensive Node.js Express server for testing the Angular Library Book Manager application. This server provides all necessary endpoints for books management, authentication, error handling scenarios, and <strong>real-time WebSocket streams for teaching RxJS operators</strong>.</p>
+    </blockquote>
+
+    <hr>
+
+    <h2>Table of Contents</h2>
+    <ul>
+        <li><a href="#authentication">Authentication Endpoints</a></li>
+        <li><a href="#public-books">Public Book Endpoints</a></li>
+        <li><a href="#protected-books">Protected Book Endpoints</a></li>
+        <li><a href="#testing">Testing Endpoints</a></li>
+        <li><a href="#rxjs-sockets">🎓 RxJS Teaching / WebSocket Streams</a></li>
+        <li><a href="#help-docs">📖 Help & Documentation</a></li>
+        <li><a href="#data-models">Data Models</a></li>
+        <li><a href="#error-codes">Error Codes</a></li>
+        <li><a href="#examples">Usage Examples</a></li>
+    </ul>
+
+    <hr>
+
+    <h2 id="authentication">🔐 Authentication Endpoints</h2>
+
+    <h3>1. Login</h3>
+    <p><strong>Endpoint:</strong> <code>POST /auth/login</code></p>
+    <p><strong>Description:</strong> Authenticates a user and returns a JWT token. Accepts any username/password combination for testing purposes.</p>
+    <p><strong>Authentication Required:</strong> No</p>
+
+    <h4>Request Body</h4>
+    <pre><code>{
+  "username": "string",
+  "password": "string"
+}</code></pre>
+
+    <h4>Success Response (200 OK)</h4>
+    <pre><code>{
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "username": "admin"
+  }
+}</code></pre>
+
+    <h4>Error Response (400 Bad Request)</h4>
+    <pre><code>{
+  "error": "Username and password required"
+}</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin123"}'</code></pre>
+
+    <hr>
+
+    <h3>2. Logout</h3>
+    <p><strong>Endpoint:</strong> <code>POST /auth/logout</code></p>
+    <p><strong>Description:</strong> Invalidates the current JWT token.</p>
+    <p><strong>Authentication Required:</strong> Yes</p>
+
+    <h4>Headers</h4>
+    <pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
+
+    <h4>Success Response (200 OK)</h4>
+    <pre><code>{
+  "message": "Logout successful"
+}</code></pre>
+
+    <h4>Error Response (401 Unauthorized)</h4>
+    <pre><code>{
+  "error": "Access token required"
+}</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl -X POST http://localhost:3001/auth/logout \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"</code></pre>
+
+    <hr>
+
+    <h3>3. Verify Token</h3>
+    <p><strong>Endpoint:</strong> <code>GET /auth/verify</code></p>
+    <p><strong>Description:</strong> Verifies if the provided token is still valid.</p>
+    <p><strong>Authentication Required:</strong> Yes</p>
+
+    <h4>Headers</h4>
+    <pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
+
+    <h4>Success Response (200 OK)</h4>
+    <pre><code>{
+  "valid": true,
+  "user": {
+    "username": "admin"
+  }
+}</code></pre>
+
+    <h4>Error Response (403 Forbidden)</h4>
+    <pre><code>{
+  "error": "Invalid or expired token"
+}</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl http://localhost:3001/auth/verify \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"</code></pre>
+
+    <hr>
+
+    <h2 id="public-books">🌐 Public Book Endpoints</h2>
+    <p>These endpoints are accessible without authentication.</p>
+
+    <h3>1. Get All Books</h3>
+    <p><strong>Endpoint:</strong> <code>GET /books</code></p>
+    <p><strong>Description:</strong> Retrieves all books in the library.</p>
+    <p><strong>Authentication Required:</strong> No</p>
+
+    <h4>Success Response (200 OK)</h4>
+    <pre><code>[
+  {
+    "userId": 1,
+    "id": 1,
+    "title": "The Great Gatsby",
+    "body": "A classic American novel set in the Jazz Age..."
+  },
+  {
+    "userId": 2,
+    "id": 2,
+    "title": "To Kill a Mockingbird",
+    "body": "A gripping tale of racial injustice..."
+  },
+  ...
+]</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl http://localhost:3001/books</code></pre>
+
+    <hr>
+
+    <h3>2. Get Book by ID</h3>
+    <p><strong>Endpoint:</strong> <code>GET /books/:id</code></p>
+    <p><strong>Description:</strong> Retrieves a specific book by its ID.</p>
+    <p><strong>Authentication Required:</strong> No</p>
+
+    <h4>URL Parameters</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>id</code></td>
+                <td>number</td>
+                <td>Unique book identifier</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Success Response (200 OK)</h4>
+    <pre><code>{
+  "userId": 1,
+  "id": 1,
+  "title": "The Great Gatsby",
+  "body": "A classic American novel set in the Jazz Age..."
+}</code></pre>
+
+    <h4>Error Response (404 Not Found)</h4>
+    <pre><code>{
+  "error": "Book not found"
+}</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl http://localhost:3001/books/1</code></pre>
+
+    <hr>
+
+    <h2 id="protected-books">🔒 Protected Book Endpoints</h2>
+    <p>These endpoints require a valid JWT token in the Authorization header.</p>
+
+    <h3>1. Create Book</h3>
+    <p><strong>Endpoint:</strong> <code>POST /books</code></p>
+    <p><strong>Description:</strong> Creates a new book in the library.</p>
+    <p><strong>Authentication Required:</strong> Yes</p>
+
+    <h4>Headers</h4>
+    <pre><code>Authorization: Bearer &lt;token&gt;
+Content-Type: application/json</code></pre>
+
+    <h4>Request Body</h4>
+    <pre><code>{
+  "title": "string (required)",
+  "body": "string (required)",
+  "userId": "number (optional, defaults to 1)"
+}</code></pre>
+
+    <h4>Success Response (201 Created)</h4>
+    <pre><code>{
+  "userId": 1,
+  "id": 11,
+  "title": "New Book Title",
+  "body": "Book description goes here"
+}</code></pre>
+
+    <h4>Error Responses</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Status Code</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>400</td>
+                <td>Title and body are required</td>
+            </tr>
+            <tr>
+                <td>401</td>
+                <td>Access token required</td>
+            </tr>
+            <tr>
+                <td>403</td>
+                <td>Invalid or expired token</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl -X POST http://localhost:3001/books \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "New Book Title",
+    "body": "Book description goes here",
+    "userId": 1
+  }'</code></pre>
+
+    <hr>
+
+    <h3>2. Update Book (Full)</h3>
+    <p><strong>Endpoint:</strong> <code>PUT /books/:id</code></p>
+    <p><strong>Description:</strong> Completely updates an existing book.</p>
+    <p><strong>Authentication Required:</strong> Yes</p>
+
+    <h4>URL Parameters</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>id</code></td>
+                <td>number</td>
+                <td>Book ID to update</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Headers</h4>
+    <pre><code>Authorization: Bearer &lt;token&gt;
+Content-Type: application/json</code></pre>
+
+    <h4>Request Body</h4>
+    <pre><code>{
+  "title": "string",
+  "body": "string",
+  "userId": "number"
+}</code></pre>
+
+    <h4>Success Response (200 OK)</h4>
+    <pre><code>{
+  "userId": 1,
+  "id": 1,
+  "title": "Updated Title",
+  "body": "Updated description"
+}</code></pre>
+
+    <h4>Error Response (404 Not Found)</h4>
+    <pre><code>{
+  "error": "Book not found"
+}</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl -X PUT http://localhost:3001/books/1 \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Updated Title",
+    "body": "Updated description",
+    "userId": 1
+  }'</code></pre>
+
+    <hr>
+
+    <h3>3. Update Book (Partial)</h3>
+    <p><strong>Endpoint:</strong> <code>PATCH /books/:id</code></p>
+    <p><strong>Description:</strong> Partially updates specific fields of a book.</p>
+    <p><strong>Authentication Required:</strong> Yes</p>
+
+    <h4>URL Parameters</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>id</code></td>
+                <td>number</td>
+                <td>Book ID to update</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Headers</h4>
+    <pre><code>Authorization: Bearer &lt;token&gt;
+Content-Type: application/json</code></pre>
+
+    <h4>Request Body</h4>
+    <pre><code>{
+  "title": "string (optional)",
+  "body": "string (optional)",
+  "userId": "number (optional)"
+}</code></pre>
+
+    <h4>Success Response (200 OK)</h4>
+    <pre><code>{
+  "userId": 1,
+  "id": 1,
+  "title": "New Title Only",
+  "body": "Original description"
+}</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl -X PATCH http://localhost:3001/books/1 \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{"title": "New Title Only"}'</code></pre>
+
+    <hr>
+
+    <h3>4. Delete Book</h3>
+    <p><strong>Endpoint:</strong> <code>DELETE /books/:id</code></p>
+    <p><strong>Description:</strong> Deletes a book from the library.</p>
+    <p><strong>Authentication Required:</strong> Yes</p>
+
+    <h4>URL Parameters</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>id</code></td>
+                <td>number</td>
+                <td>Book ID to delete</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Headers</h4>
+    <pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
+
+    <h4>Success Response (200 OK)</h4>
+    <pre><code>{
+  "message": "Book deleted successfully",
+  "id": 1
+}</code></pre>
+
+    <h4>Error Response (404 Not Found)</h4>
+    <pre><code>{
+  "error": "Book not found"
+}</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl -X DELETE http://localhost:3001/books/1 \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"</code></pre>
+
+    <hr>
+
+    <h2 id="testing">🧪 Testing Endpoints</h2>
+
+    <h3>1. Test 500 Error</h3>
+    <p><strong>Endpoint:</strong> <code>GET /error/500</code></p>
+    <p><strong>Description:</strong> Returns a 500 Internal Server Error for testing error handling.</p>
+    <p><strong>Authentication Required:</strong> No</p>
+
+    <h4>Response (500 Internal Server Error)</h4>
+    <pre><code>{
+  "error": "Internal server error"
+}</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl http://localhost:3001/error/500</code></pre>
+
+    <hr>
+
+    <h3>2. Test Timeout</h3>
+    <p><strong>Endpoint:</strong> <code>GET /error/timeout</code></p>
+    <p><strong>Description:</strong> Simulates a long-running request (30 seconds) for timeout testing.</p>
+    <p><strong>Authentication Required:</strong> No</p>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl http://localhost:3001/error/timeout</code></pre>
+
+    <hr>
+
+    <h3>3. Reset Data</h3>
+    <p><strong>Endpoint:</strong> <code>POST /reset</code></p>
+    <p><strong>Description:</strong> Resets all books to initial state and clears all authentication tokens.</p>
+    <p><strong>Authentication Required:</strong> No</p>
+
+    <h4>Success Response (200 OK)</h4>
+    <pre><code>{
+  "message": "Data reset successfully"
+}</code></pre>
+
+    <h4>cURL Example</h4>
+    <pre><code>curl -X POST http://localhost:3001/reset</code></pre>
+
+    <hr>
+
+    <h2 id="rxjs-sockets">🎓 RxJS Teaching / WebSocket Streams</h2>
+    <p>Real-time WebSocket streams for teaching RxJS operators. This server provides configurable data streams (books and issues) that emit at custom intervals with error injection, duplicates, and delays for comprehensive operator teaching.</p>
+
+    <h3>WebSocket Connection</h3>
+    <p><strong>URL:</strong> <code>ws://localhost:3001</code></p>
+    <p><strong>Library:</strong> Socket.io (install in Angular: <code>npm install socket.io-client</code>)</p>
+
+    <h3>HTTP Control Endpoints</h3>
+
+    <h4>1. Get Active Streams</h4>
+    <p><strong>Endpoint:</strong> <code>GET /rxjs/streams</code></p>
+    <p><strong>Description:</strong> Returns currently active streams and their configurations.</p>
+    <pre><code>curl http://localhost:3001/rxjs/streams</code></pre>
+
+    <h4>2. Start Custom Stream</h4>
+    <p><strong>Endpoint:</strong> <code>POST /rxjs/streams/start</code></p>
+    <p><strong>Description:</strong> Start a stream with custom configuration.</p>
+    <pre><code>{
+  "streamName": "books",
+  "interval": 2000,
+  "duration": 60000,
+  "errorRate": 10,
+  "duplicateRate": 0,
+  "delayVariation": 500,
+  "burstMode": false
+}</code></pre>
+
+    <h4>3. Stop Stream</h4>
+    <p><strong>Endpoint:</strong> <code>POST /rxjs/streams/stop/:streamName</code></p>
+    <p><strong>Description:</strong> Stop a specific stream.</p>
+
+    <h4>4. Stop All Streams</h4>
+    <p><strong>Endpoint:</strong> <code>POST /rxjs/streams/stop-all</code></p>
+    <p><strong>Description:</strong> Stop all running streams.</p>
+
+    <h4>5. Get Preset Configurations</h4>
+    <p><strong>Endpoint:</strong> <code>GET /rxjs/presets</code></p>
+    <p><strong>Description:</strong> Get pre-configured scenarios for teaching specific operators.</p>
+    <p><strong>Available Presets:</strong></p>
+    <ul>
+        <li><code>basic</code> - Simple streams for map, filter, tap</li>
+        <li><code>throttleDebounce</code> - Fast bursts for throttle vs debounce</li>
+        <li><code>errorHandling</code> - Random errors for catchError, retry</li>
+        <li><code>distinctDuplicates</code> - Duplicates for distinctUntilChanged</li>
+        <li><code>combination</code> - Two streams for combineLatest, merge, zip</li>
+        <li><code>switching</code> - Variable delays for switchMap, mergeMap</li>
+        <li><code>buffering</code> - Fast stream for buffer operators</li>
+        <li><code>timing</code> - Variable timing for delay, timeout</li>
+    </ul>
+
+    <h4>6. Start Preset</h4>
+    <p><strong>Endpoint:</strong> <code>POST /rxjs/presets/:presetName</code></p>
+    <p><strong>Example:</strong></p>
+    <pre><code>curl -X POST http://localhost:3001/rxjs/presets/combination</code></pre>
+
+    <h4>7. Get Operators Guide</h4>
+    <p><strong>Endpoint:</strong> <code>GET /rxjs/operators-guide</code></p>
+    <p><strong>Description:</strong> Get comprehensive guide on RxJS operators and what to teach.</p>
+
+    <h3>Socket Events</h3>
+
+    <h4>Client to Server Events</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Data</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>start-stream</code></td>
+                <td>config object</td>
+                <td>Request to start a stream</td>
+            </tr>
+            <tr>
+                <td><code>stop-stream</code></td>
+                <td>streamName string</td>
+                <td>Request to stop a stream</td>
+            </tr>
+            <tr>
+                <td><code>get-configs</code></td>
+                <td>-</td>
+                <td>Request current configurations</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Server to Client Events</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Data</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>books</code></td>
+                <td>Book object</td>
+                <td>New book data emission</td>
+            </tr>
+            <tr>
+                <td><code>books-error</code></td>
+                <td>Error object</td>
+                <td>Error in books stream</td>
+            </tr>
+            <tr>
+                <td><code>books-complete</code></td>
+                <td>Summary object</td>
+                <td>Books stream completed</td>
+            </tr>
+            <tr>
+                <td><code>issues</code></td>
+                <td>Issue object</td>
+                <td>New issue data emission</td>
+            </tr>
+            <tr>
+                <td><code>issues-error</code></td>
+                <td>Error object</td>
+                <td>Error in issues stream</td>
+            </tr>
+            <tr>
+                <td><code>issues-complete</code></td>
+                <td>Summary object</td>
+                <td>Issues stream completed</td>
+            </tr>
+            <tr>
+                <td><code>stream-started</code></td>
+                <td>Config confirmation</td>
+                <td>Confirmation stream started</td>
+            </tr>
+            <tr>
+                <td><code>stream-stopped</code></td>
+                <td>Stream name</td>
+                <td>Notification stream stopped</td>
+            </tr>
+            <tr>
+                <td><code>stream-configs</code></td>
+                <td>Configs object</td>
+                <td>Current stream configurations</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Angular Integration Example</h3>
+    <pre><code>import { Injectable } from '@angular/core';
+import { io, Socket } from 'socket.io-client';
+import { Observable, fromEvent } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+@Injectable({ providedIn: 'root' })
+export class SocketService {
+  private socket: Socket;
+
+  constructor() {
+    this.socket = io('http://localhost:3001');
+  }
+
+  // Convert socket events to Observables
+  onBooks(): Observable&lt;any&gt; {
+    return fromEvent(this.socket, 'books');
+  }
+
+  onIssues(): Observable&lt;any&gt; {
+    return fromEvent(this.socket, 'issues');
+  }
+
+  // Emit events to server
+  startStream(config: any): void {
+    this.socket.emit('start-stream', config);
+  }
+
+  stopStream(name: string): void {
+    this.socket.emit('stop-stream', name);
+  }
+}</code></pre>
+
+    <hr>
+
+    <h2 id="help-docs">📖 Help & Documentation</h2>
+
+    <h3>WebSocket & Socket.io Complete Guide</h3>
+    <p><strong>Endpoint:</strong> <code>GET /help/sockets</code></p>
+    <p><strong>Description:</strong> Comprehensive educational resource about WebSockets, Socket.io, and their integration with RxJS for teaching purposes.</p>
+    <p><strong>Topics Covered:</strong></p>
+    <ul>
+        <li>What are WebSockets and why use them</li>
+        <li>WebSocket vs HTTP polling vs long-polling</li>
+        <li>Socket.io features and architecture</li>
+        <li>RxJS integration patterns</li>
+        <li>Implementation details of this project</li>
+        <li>Angular integration guide</li>
+        <li>Best practices for performance, security, reliability</li>
+        <li>Debugging tips and common issues</li>
+        <li>Available endpoints and socket events</li>
+    </ul>
+    <pre><code>curl http://localhost:3001/help/sockets</code></pre>
+
+    <hr>
+
+    <h2 id="data-models">📊 Data Models</h2>
+
+    <h3>Book Object (API Response)</h3>
+    <p>The server returns books in this format:</p>
+    <pre><code>{
+  "userId": number,     // Author ID (1-5)
+  "id": number,         // Unique book identifier
+  "title": string,      // Book title
+  "body": string        // Book description
+}</code></pre>
+
+    <h3>Angular Book Model (After Transformation)</h3>
+    <p>In your Angular application, transform the API response to this format:</p>
+    <pre><code>{
+  "id": number,
+  "title": string,
+  "author": string,              // Transform userId to "Author 1", etc.
+  "description": string,         // Map from body field
+  "status": "available" | "reading" | "read"
+}</code></pre>
+
+    <h3>Login Request</h3>
+    <pre><code>{
+  "username": string,
+  "password": string
+}</code></pre>
+
+    <h3>Login Response</h3>
+    <pre><code>{
+  "message": string,
+  "token": string,      // JWT token
+  "user": {
+    "username": string
+  }
+}</code></pre>
+
+    <hr>
+
+    <h2 id="error-codes">⚠️ Error Codes</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Status Code</th>
+                <th>Meaning</th>
+                <th>Common Causes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>200</strong></td>
+                <td>OK</td>
+                <td>Request succeeded</td>
+            </tr>
+            <tr>
+                <td><strong>201</strong></td>
+                <td>Created</td>
+                <td>Resource created successfully</td>
+            </tr>
+            <tr>
+                <td><strong>400</strong></td>
+                <td>Bad Request</td>
+                <td>Missing required fields or invalid data format</td>
+            </tr>
+            <tr>
+                <td><strong>401</strong></td>
+                <td>Unauthorized</td>
+                <td>No authentication token provided</td>
+            </tr>
+            <tr>
+                <td><strong>403</strong></td>
+                <td>Forbidden</td>
+                <td>Invalid or expired authentication token</td>
+            </tr>
+            <tr>
+                <td><strong>404</strong></td>
+                <td>Not Found</td>
+                <td>Book or endpoint does not exist</td>
+            </tr>
+            <tr>
+                <td><strong>500</strong></td>
+                <td>Internal Server Error</td>
+                <td>Server encountered an unexpected error</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Error Response Format</h3>
+    <p>All errors follow this format:</p>
+    <pre><code>{
+  "error": "Error message description"
+}</code></pre>
+
+    <hr>
+
+    <h2 id="examples">💡 Usage Examples</h2>
+
+    <h3>Complete Workflow Example</h3>
+
+    <h4>Step 1: View Public Books</h4>
+    <pre><code>curl http://localhost:3001/books</code></pre>
+
+    <h4>Step 2: Login</h4>
+    <pre><code>curl -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "testpass"}'
+
+# Response:
+# {
+#   "message": "Login successful",
+#   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#   "user": {"username": "testuser"}
+# }</code></pre>
+
+    <h4>Step 3: Save Token</h4>
+    <pre><code># Set the token from the login response
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</code></pre>
+
+    <h4>Step 4: Create a Book (Protected)</h4>
+    <pre><code>curl -X POST http://localhost:3001/books \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Angular Best Practices",
+    "body": "A comprehensive guide to Angular development",
+    "userId": 1
+  }'
+
+# Response:
+# {
+#   "userId": 1,
+#   "id": 11,
+#   "title": "Angular Best Practices",
+#   "body": "A comprehensive guide to Angular development"
+# }</code></pre>
+
+    <h4>Step 5: Update the Book</h4>
+    <pre><code>curl -X PUT http://localhost:3001/books/11 \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Advanced Angular Best Practices",
+    "body": "An updated comprehensive guide",
+    "userId": 1
+  }'</code></pre>
+
+    <h4>Step 6: Delete the Book</h4>
+    <pre><code>curl -X DELETE http://localhost:3001/books/11 \
+  -H "Authorization: Bearer $TOKEN"</code></pre>
+
+    <h4>Step 7: Logout</h4>
+    <pre><code>curl -X POST http://localhost:3001/auth/logout \
+  -H "Authorization: Bearer $TOKEN"</code></pre>
+
+    <hr>
+
+    <h3>Angular HttpClient Sample code to get you started</h3>
+
+    <h4>AuthService Implementation</h4>
+    <pre><code>import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private apiUrl = 'http://localhost:3001/auth';
+  private tokenKey = 'auth_token';
+
+  constructor(private http: HttpClient) {}
+
+  login(username: string, password: string): Observable&lt;any&gt; {
+    return this.http.post&lt;any&gt;(`${this.apiUrl}/login`, { username, password }).pipe(
+      tap(response =&gt; {
+        if (response.token) {
+          localStorage.setItem(this.tokenKey, response.token);
+        }
+      })
+    );
+  }
+
+  logout(): Observable&lt;any&gt; {
+    return this.http.post(`${this.apiUrl}/logout`, {}).pipe(
+      tap(() =&gt; {
+        localStorage.removeItem(this.tokenKey);
+      })
+    );
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+}</code></pre>
+
+    <hr>
+
+    <h2>🚀 Quick Start</h2>
+
+    <h3>Installation</h3>
+    <pre><code>npm install</code></pre>
+
+    <h3>Run Server</h3>
+    <pre><code># Standard mode
+npm start
+
+# Development mode with auto-reload
+npm run dev</code></pre>
+
+    <h3>Configuration</h3>
+    <ul>
+        <li><strong>Port:</strong> 3001 (configurable in server.js)</li>
+        <li><strong>CORS:</strong> Enabled for all origins</li>
+        <li><strong>JWT Secret:</strong> Configurable in server.js</li>
+        <li><strong>Network Delay:</strong> 500ms simulation (configurable)</li>
+    </ul>
+
+    <hr>
+
+    <h2>📝 Notes</h2>
+
+    <ul>
+        <li><strong>Mock Authentication:</strong> The server accepts ANY username/password combination for testing purposes.</li>
+        <li><strong>In-Memory Storage:</strong> All data is stored in memory and resets when the server restarts.</li>
+        <li><strong>CORS Enabled:</strong> The server has CORS enabled to allow requests from Angular dev server (http://localhost:4200).</li>
+        <li><strong>Request Logging:</strong> All requests are logged to the console with headers for debugging.</li>
+        <li><strong>Token Storage:</strong> Tokens are tracked server-side for logout functionality.</li>
+        <li><strong>Network Delay:</strong> All endpoints simulate a 500ms network delay for realistic testing.</li>
+    </ul>
+
+    <hr>
+
+    <h2>🔗 Additional Resources</h2>
+
+    <ul>
+        <li><a href="https://angular.io/guide/http">Angular HttpClient Guide</a></li>
+        <li><a href="https://rxjs.dev/guide/operators">RxJS Operators</a></li>
+        <li><a href="https://jwt.io/">JWT.io - Token Debugger</a></li>
+        <li><a href="https://expressjs.com/">Express.js Documentation</a></li>
+    </ul>
+
+    <hr>
+
+    <p><em>Generated: February 10, 2026</em></p>
+    <p><em>Version: 2.0.0 - Added RxJS Teaching WebSocket Streams</em></p>
+
+</body>
+</html>

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angular Task: Library Book Manager</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #24292e;
+            background-color: #ffffff;
+            padding: 20px;
+            margin: 0 auto;
+            max-width: 1000px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #0366d6;
+            border-bottom: 3px solid #0366d6;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #24292e;
+            margin-top: 40px;
+            border-bottom: 2px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.4em;
+            color: #0366d6;
+            margin-top: 30px;
+        }
+
+        h4 {
+            font-size: 1.1em;
+            color: #586069;
+            margin-top: 20px;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 85%;
+            background-color: rgba(27, 31, 35, 0.05);
+            padding: 3px 6px;
+            border-radius: 3px;
+        }
+
+        pre {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 85%;
+            line-height: 1.45;
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+            margin: 16px 0;
+            border: 1px solid #e1e4e8;
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        ul, ol {
+            padding-left: 30px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            border: 1px solid #e1e4e8;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+            padding: 12px;
+            border: 1px solid #e1e4e8;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border: 1px solid #e1e4e8;
+        }
+
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #0366d6;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .code-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #6c757d;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .task-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .task-list li {
+            padding: 8px 0;
+        }
+
+        .task-list li::before {
+            content: "☐ ";
+            font-size: 1.2em;
+            margin-right: 8px;
+            color: #0366d6;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #e1e4e8;
+            margin: 40px 0;
+        }
+
+        .highlight {
+            background-color: #fff3b0;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        strong {
+            color: #0366d6;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 Angular Task: Library Book Manager</h1>
+
+    <div class="info-box">
+        <strong>📚 Task Overview:</strong> Build a simple Library Book Management system where users can browse books, add new books, and manage their reading list. This task tests your understanding of HTTP requests, RxJS operators, route guards, and HTTP interceptors.
+    </div>
+
+    <h2>Learning Objectives</h2>
+    <ul>
+        <li>Make HTTP requests using Angular's HttpClient (GET, POST, PUT, DELETE)</li>
+        <li>Use RxJS operators to transform and manipulate data streams</li>
+        <li>Implement route guards to protect authenticated routes</li>
+        <li>Create HTTP interceptors for automatic token management</li>
+        <li>Handle HTTP errors gracefully with user-friendly messages</li>
+    </ul>
+
+    <hr>
+
+    <h2>Application Features</h2>
+
+    <h3>1. Public Features <span class="emoji">🌐</span> (No authentication required)</h3>
+    <ul>
+        <li>View all available books in the library</li>
+        <li>View individual book details</li>
+        <li>Access login page</li>
+    </ul>
+
+    <h3>2. Protected Features <span class="emoji">🔒</span> (Authentication required)</h3>
+    <ul>
+        <li>Add new books to the library</li>
+        <li>Update book status (available, reading, read)</li>
+        <li>Delete books from the library</li>
+        <li>View personal reading list</li>
+    </ul>
+
+    <hr>
+
+    <h2>Technical Requirements</h2>
+
+    <h3>Part 1: HTTP Service Setup (BookService)</h3>
+
+    <p>Create a <code>BookService</code> that communicates with the local Node.js Express server:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>HTTP Verb</th>
+                <th>Endpoint</th>
+                <th>Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>getBooks()</code></td>
+                <td>GET</td>
+                <td><code>/books</code></td>
+                <td>Fetch all books</td>
+            </tr>
+            <tr>
+                <td><code>getBookById(id)</code></td>
+                <td>GET</td>
+                <td><code>/books/:id</code></td>
+                <td>Fetch single book</td>
+            </tr>
+            <tr>
+                <td><code>addBook(book)</code></td>
+                <td>POST</td>
+                <td><code>/books</code></td>
+                <td>Create new book</td>
+            </tr>
+            <tr>
+                <td><code>updateBook(id, book)</code></td>
+                <td>PUT</td>
+                <td><code>/books/:id</code></td>
+                <td>Update book status</td>
+            </tr>
+            <tr>
+                <td><code>deleteBook(id)</code></td>
+                <td>DELETE</td>
+                <td><code>/books/:id</code></td>
+                <td>Remove book</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="info-box">
+        <strong>API Base URL:</strong> <code>http://localhost:3001</code>
+    </div>
+
+    <h3>Part 2: RxJS Operators Implementation</h3>
+
+    <p>Apply the following RxJS operators in your BookService:</p>
+
+    <h4>1. map() - Transform API Response</h4>
+    <p>Transform the API book data to your Book model:</p>
+
+    <pre><code>// API Response Format
+{
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+}
+
+// Your Book Model
+{
+  id: number;
+  title: string;
+  author: string;        // Transform userId to "Author 1", "Author 2", etc.
+  description: string;   // Map from body
+  status: 'available' | 'reading' | 'read';  // Default: 'available'
+}</code></pre>
+
+    <h4>2. catchError() - Handle Errors</h4>
+    <p>Catch HTTP errors and return user-friendly error messages.</p>
+
+    <h4>3. retry() - Retry Failed Requests</h4>
+    <p>Retry failed requests once before throwing an error.</p>
+
+    <h4>4. filter() (Optional)</h4>
+    <p>Filter books by status in components.</p>
+
+    <h3>Part 3: Authentication Service (AuthService)</h3>
+
+    <div class="warning-box">
+        <strong>⚙️ Authentication Implementation Options:</strong>
+        <p>You have <strong>two options</strong> for handling authentication tokens. Choose the approach that best fits your application needs:</p>
+        
+        <h4>Option 1: Token Management in AuthService (Recommended for Learning)</h4>
+        <ul>
+            <li><strong>Approach:</strong> <code>AuthService</code> handles all token operations (store, retrieve, remove)</li>
+            <li><strong>Interceptor:</strong> Calls <code>AuthService.getToken()</code> to add Authorization header</li>
+            <li><strong>Pros:</strong> Central token management, easier to test, clear separation of concerns</li>
+            <li><strong>Cons:</strong> Slight overhead of service injection in interceptor</li>
+        </ul>
+        
+        <h4>Option 2: Direct Token Management in Interceptor</h4>
+        <ul>
+            <li><strong>Approach:</strong> <code>AuthInterceptor</code> directly accesses <code>localStorage</code> to get token</li>
+            <li><strong>AuthService:</strong> Only handles login/logout operations</li>
+            <li><strong>Pros:</strong> Slightly more performant, less dependency injection</li>
+            <li><strong>Cons:</strong> Token logic split across two places, harder to test</li>
+        </ul>
+        
+        <p><strong>💡 Recommendation:</strong> Use <strong>Option 1</strong> for this learning task to maintain better code organization and testability.</p>
+    </div>
+
+    <p>Create an <code>AuthService</code> with the following methods:</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>Return Type</th>
+                <th>Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>login(username, password)</code></td>
+                <td><code>boolean</code></td>
+                <td>Store fake token in localStorage, return true if successful</td>
+            </tr>
+            <tr>
+                <td><code>logout()</code></td>
+                <td><code>void</code></td>
+                <td>Remove token from localStorage</td>
+            </tr>
+            <tr>
+                <td><code>isLoggedIn()</code></td>
+                <td><code>boolean</code></td>
+                <td>Check if token exists in localStorage</td>
+            </tr>
+            <tr>
+                <td><code>getToken()</code></td>
+                <td><code>string | null</code></td>
+                <td>Retrieve token from localStorage</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="warning-box">
+        <strong>Note:</strong> The Node.js server accepts any username/password combination and returns a real JWT token for testing purposes.
+    </div>
+
+    <h3>Part 4: Route Guards (AuthGuard)</h3>
+
+    <p>Create an <code>AuthGuard</code> that implements <code>CanActivate</code>:</p>
+
+    <ul>
+        <li>Check if user is logged in using <code>AuthService.isLoggedIn()</code></li>
+        <li>If authenticated: allow navigation (return <code>true</code>)</li>
+        <li>If not authenticated:
+            <ul>
+                <li>Redirect to <code>/login</code></li>
+                <li>Save attempted URL in query parameters: <code>returnUrl</code></li>
+                <li>Block navigation (return <code>false</code>)</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Part 5: HTTP Interceptor (AuthInterceptor)</h3>
+
+    <p>Create an <code>AuthInterceptor</code> that:</p>
+
+    <ul>
+        <li>Intercepts all outgoing HTTP requests</li>
+        <li><strong>Option 1:</strong> Retrieves token from <code>AuthService.getToken()</code></li>
+        <li><strong>Option 2:</strong> Retrieves token directly from <code>localStorage.getItem('auth_token')</code></li>
+        <li>Adds <code>Authorization</code> header with format: <code>Bearer &lt;token&gt;</code></li>
+        <li>Only adds header if token exists (to avoid issues with public endpoints)</li>
+        <li>Logs request URL to console for debugging (optional)</li>
+        <li>Passes modified request to the next handler</li>
+    </ul>
+
+    <div class="info-box">
+        <strong>Important:</strong> Remember to register the interceptor in <code>app.module.ts</code> providers with <code>multi: true</code>
+    </div>
+
+    <h3>Part 6: Error Handling</h3>
+
+    <p>Implement error handling that shows user-friendly messages based on HTTP status codes:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Status Code</th>
+                <th>Error Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>0</code></td>
+                <td>"Network error. Please check your internet connection."</td>
+            </tr>
+            <tr>
+                <td><code>404</code></td>
+                <td>"Book not found."</td>
+            </tr>
+            <tr>
+                <td><code>500</code></td>
+                <td>"Server error. Please try again later."</td>
+            </tr>
+            <tr>
+                <td>Other</td>
+                <td>Display the actual error message</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>Display error messages in the component UI</li>
+        <li>Provide a "Retry" button for failed requests</li>
+    </ul>
+
+    <hr>
+
+    <h2>Project Structure</h2>
+
+    <pre><code>src/
+├── app/
+│   ├── components/
+│   │   ├── book-list/
+│   │   │   ├── book-list.component.ts
+│   │   │   ├── book-list.component.html
+│   │   │   └── book-list.component.css
+│   │   ├── book-detail/
+│   │   │   ├── book-detail.component.ts
+│   │   │   ├── book-detail.component.html
+│   │   │   └── book-detail.component.css
+│   │   ├── add-book/
+│   │   │   ├── add-book.component.ts
+│   │   │   ├── add-book.component.html
+│   │   │   └── add-book.component.css
+│   │   ├── login/
+│   │   │   ├── login.component.ts
+│   │   │   ├── login.component.html
+│   │   │   └── login.component.css
+│   │   └── my-books/
+│   │       ├── my-books.component.ts
+│   │       ├── my-books.component.html
+│   │       └── my-books.component.css
+│   ├── services/
+│   │   ├── book.service.ts
+│   │   └── auth.service.ts
+│   ├── guards/
+│   │   └── auth.guard.ts
+│   ├── interceptors/
+│   │   └── auth.interceptor.ts
+│   ├── models/
+│   │   └── book.model.ts
+│   ├── app-routing.module.ts
+│   ├── app.module.ts
+│   └── app.component.ts
+└── environments/
+    └── environment.ts</code></pre>
+
+    <hr>
+
+    <h2>Routing Configuration</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Route</th>
+                <th>Component</th>
+                <th>Guard</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>/</code></td>
+                <td>Redirect</td>
+                <td>None</td>
+                <td>Redirect to /books</td>
+            </tr>
+            <tr>
+                <td><code>/books</code></td>
+                <td>BookListComponent</td>
+                <td>None</td>
+                <td>Public - List all books</td>
+            </tr>
+            <tr>
+                <td><code>/books/:id</code></td>
+                <td>BookDetailComponent</td>
+                <td>None</td>
+                <td>Public - Book details</td>
+            </tr>
+            <tr>
+                <td><code>/login</code></td>
+                <td>LoginComponent</td>
+                <td>None</td>
+                <td>Public - Login page</td>
+            </tr>
+            <tr>
+                <td><code>/add-book</code></td>
+                <td>AddBookComponent</td>
+                <td><strong>AuthGuard</strong></td>
+                <td>Protected - Add new book</td>
+            </tr>
+            <tr>
+                <td><code>/my-books</code></td>
+                <td>MyBooksComponent</td>
+                <td><strong>AuthGuard</strong></td>
+                <td>Protected - User's reading list</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h2>Data Models</h2>
+
+    <h3>Book Interface</h3>
+    <pre><code>export interface Book {
+  id: number;
+  title: string;
+  author: string;
+  description: string;
+  status: 'available' | 'reading' | 'read';
+}</code></pre>
+
+    <h3>API Book Response Interface</h3>
+    <pre><code>export interface ApiBook {
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+}</code></pre>
+
+    <hr>
+
+    <h2>Implementation Steps</h2>
+
+    <h3>Step 1: Setup Services</h3>
+    <ul class="task-list">
+        <li>Generate <code>BookService</code> and implement all HTTP methods</li>
+        <li>Generate <code>AuthService</code> with login/logout functionality</li>
+        <li>Add RxJS operators (map, catchError, retry) to BookService</li>
+    </ul>
+
+    <h3>Step 2: Create Components</h3>
+    <ul class="task-list">
+        <li>Create <code>BookListComponent</code> - Display all books with loading/error states</li>
+        <li>Create <code>BookDetailComponent</code> - Show single book details</li>
+        <li>Create <code>AddBookComponent</code> - Form to add new books</li>
+        <li>Create <code>LoginComponent</code> - Simple login form</li>
+        <li>Create <code>MyBooksComponent</code> - Display user's reading list</li>
+    </ul>
+
+    <h3>Step 3: Implement Guards</h3>
+    <ul class="task-list">
+        <li>Generate <code>AuthGuard</code></li>
+        <li>Implement <code>canActivate()</code> method</li>
+        <li>Apply guard to protected routes in routing module</li>
+    </ul>
+
+    <h3>Step 4: Create Interceptor</h3>
+    <ul class="task-list">
+        <li>Generate <code>AuthInterceptor</code></li>
+        <li>Implement <code>intercept()</code> method</li>
+        <li>Register interceptor in <code>app.module.ts</code> providers</li>
+    </ul>
+
+    <h3>Step 5: Error Handling</h3>
+    <ul class="task-list">
+        <li>Add error handling in BookService methods</li>
+        <li>Display error messages in component templates</li>
+        <li>Add retry functionality for failed requests</li>
+    </ul>
+
+    <h3>Step 6: Testing</h3>
+    <ul class="task-list">
+        <li>Test all CRUD operations (Create, Read, Update, Delete)</li>
+        <li>Test guard protection (try accessing protected routes without login)</li>
+        <li>Verify interceptor adds Authorization header</li>
+        <li>Test error handling scenarios</li>
+    </ul>
+
+    <hr>
+
+    <h2>Testing Checklist</h2>
+
+    <h3>Without Authentication</h3>
+    <ul class="task-list">
+        <li>Can view book list at <code>/books</code></li>
+        <li>Can view individual book details</li>
+        <li>Cannot access <code>/add-book</code> (should redirect to login)</li>
+        <li>Cannot access <code>/my-books</code> (should redirect to login)</li>
+        <li>Login page is accessible</li>
+    </ul>
+
+    <h3>After Login</h3>
+    <ul class="task-list">
+        <li>Can access all protected routes</li>
+        <li>Can add new books</li>
+        <li>Can update book status</li>
+        <li>Can delete books</li>
+        <li>Interceptor adds Authorization header to all requests</li>
+        <li>After login, redirects to returnUrl if it was set</li>
+    </ul>
+
+    <h3>Error Handling</h3>
+    <ul class="task-list">
+        <li>Network errors display appropriate message</li>
+        <li>404 errors show "Book not found"</li>
+        <li>Failed requests retry once automatically</li>
+        <li>Retry button allows manual retry</li>
+        <li>Loading states are displayed during requests</li>
+    </ul>
+
+    <hr>
+
+</body>
+</html>
