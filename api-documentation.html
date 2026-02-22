@@ -1,903 +1,1600 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Angular Book Server - API Documentation</title>
-    <link rel="stylesheet" href="notes-template.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Book Server — API Documentation v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f12;
+      --bg2:       #13161b;
+      --bg3:       #1a1e25;
+      --border:    #252b35;
+      --border2:   #2e3540;
+      --text:      #c8d0dc;
+      --text-dim:  #5a6678;
+      --text-head: #eef2f8;
+      --accent:    #3b82f6;
+      --accent2:   #10b981;
+      --warn:      #f59e0b;
+      --danger:    #ef4444;
+      --purple:    #8b5cf6;
+      --mono:      'DM Mono', monospace;
+      --sans:      'DM Sans', sans-serif;
+      --display:   'Syne', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ── LAYOUT ── */
+    .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 2rem 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .sidebar-brand .logo {
+      font-family: var(--display);
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-head);
+      display: block;
+      line-height: 1.2;
+    }
+    .sidebar-brand .version {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      margin-top: 0.3rem;
+      display: block;
+    }
+    .nav-section-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0.8rem 1.5rem 0.3rem;
+      display: block;
+    }
+    .nav-group { margin-bottom: 0.5rem; }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1.5rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 400;
+      transition: color 0.15s, background 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .nav-link:hover { color: var(--text-head); background: rgba(59,130,246,0.05); }
+    .nav-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(59,130,246,0.08); }
+    .nav-link .badge {
+      font-family: var(--mono);
+      font-size: 0.55rem;
+      padding: 0.1em 0.4em;
+      border-radius: 3px;
+      margin-left: auto;
+    }
+    .badge.v2 { background: rgba(16,185,129,0.15); color: var(--accent2); }
+    .badge.legacy { background: rgba(245,158,11,0.12); color: var(--warn); }
+    .badge.lib { background: rgba(139,92,246,0.15); color: var(--purple); }
+
+    /* ── MAIN CONTENT ── */
+    .main { padding: 3rem 4rem; max-width: 900px; }
+
+    /* ── COMPAT BANNER ── */
+    .compat-banner {
+      background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(16,185,129,0.06) 100%);
+      border: 1px solid var(--border2);
+      border-left: 3px solid var(--accent2);
+      border-radius: 4px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .compat-banner h3 {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 0.6rem;
+    }
+    .compat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+    .compat-item {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 0.8rem 1rem;
+      border-radius: 3px;
+    }
+    .compat-item .compat-tag {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+      display: block;
+    }
+    .compat-item.v2 .compat-tag { color: var(--accent2); }
+    .compat-item.legacy .compat-tag { color: var(--warn); }
+    .compat-item p { font-size: 0.8rem; color: var(--text); }
+    .compat-item code { font-family: var(--mono); color: var(--accent); font-size: 0.78rem; }
+
+    /* ── PAGE HEADINGS ── */
+    .page-title {
+      font-family: var(--display);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-head);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+    .page-subtitle {
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      margin-bottom: 2.5rem;
+    }
+    .page-subtitle code { font-family: var(--mono); color: var(--accent); font-size: 0.82rem; }
+
+    .section { margin-bottom: 3.5rem; }
+    .section-title {
+      font-family: var(--display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-head);
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .section-title .pill {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2em 0.6em;
+      border-radius: 3px;
+      font-weight: 400;
+    }
+    .pill.v2 { background: rgba(16,185,129,0.15); color: var(--accent2); }
+    .pill.legacy { background: rgba(245,158,11,0.12); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+
+    /* ── ENDPOINT CARDS ── */
+    .endpoint-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 1.2rem;
+      overflow: hidden;
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.75rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .method {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      padding: 0.25em 0.6em;
+      border-radius: 3px;
+      min-width: 52px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .GET    { background: rgba(16,185,129,0.15);  color: var(--accent2); }
+    .POST   { background: rgba(59,130,246,0.15);  color: var(--accent); }
+    .PUT    { background: rgba(245,158,11,0.12);  color: var(--warn); }
+    .PATCH  { background: rgba(139,92,246,0.12);  color: var(--purple); }
+    .DELETE { background: rgba(239,68,68,0.12);   color: var(--danger); }
+
+    .endpoint-path {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--text-head);
+      flex: 1;
+    }
+    .endpoint-desc {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    .auth-badge {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      padding: 0.2em 0.55em;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .auth-no  { background: rgba(16,185,129,0.1); color: var(--accent2); border: 1px solid rgba(16,185,129,0.2); }
+    .auth-yes { background: rgba(245,158,11,0.1); color: var(--warn);    border: 1px solid rgba(245,158,11,0.2); }
+    .auth-lib { background: rgba(139,92,246,0.1); color: var(--purple);  border: 1px solid rgba(139,92,246,0.2); }
+
+    .endpoint-body { padding: 1.2rem; }
+
+    /* ── FIELD LABEL ── */
+    .field-label {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+      margin-top: 1rem;
+      display: block;
+    }
+    .field-label:first-child { margin-top: 0; }
+
+    /* ── CODE BLOCKS ── */
+    pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: #a8b8cc;
+    }
+    code { font-family: var(--mono); font-size: 0.82rem; color: var(--accent); }
+    pre code { color: inherit; font-size: inherit; }
+
+    /* ── TABLES ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.5rem 0; }
+    th {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 0.5rem 0.8rem;
+      background: var(--bg3);
+      color: var(--text-dim);
+      font-weight: 400;
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: rgba(255,255,255,0.02); }
+    td code { font-size: 0.78rem; }
+
+    /* status codes in tables */
+    .status-200 { color: var(--accent2); font-family: var(--mono); font-weight: 500; }
+    .status-201 { color: var(--accent);  font-family: var(--mono); font-weight: 500; }
+    .status-400 { color: var(--warn);    font-family: var(--mono); font-weight: 500; }
+    .status-401 { color: var(--danger);  font-family: var(--mono); font-weight: 500; }
+    .status-403 { color: var(--danger);  font-family: var(--mono); font-weight: 500; }
+    .status-404 { color: var(--warn);    font-family: var(--mono); font-weight: 500; }
+    .status-409 { color: var(--purple);  font-family: var(--mono); font-weight: 500; }
+    .status-500 { color: var(--danger);  font-family: var(--mono); font-weight: 500; }
+
+    /* ── CALLOUTS ── */
+    .callout {
+      border-radius: 3px;
+      padding: 0.9rem 1.1rem;
+      margin: 0.8rem 0;
+      font-size: 0.83rem;
+      border-left: 3px solid;
+    }
+    .callout-title {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    .callout p { margin: 0; }
+    .callout.info  { background: rgba(59,130,246,0.06);  border-color: var(--accent);  }
+    .callout.info  .callout-title { color: var(--accent); }
+    .callout.warn  { background: rgba(245,158,11,0.06);  border-color: var(--warn); }
+    .callout.warn  .callout-title { color: var(--warn); }
+    .callout.tip   { background: rgba(16,185,129,0.06);  border-color: var(--accent2); }
+    .callout.tip   .callout-title { color: var(--accent2); }
+    .callout.lib   { background: rgba(139,92,246,0.06);  border-color: var(--purple); }
+    .callout.lib   .callout-title { color: var(--purple); }
+
+    /* ── CREDENTIALS ── */
+    .creds { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0.5rem 0; }
+    .cred-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 0.8rem 1rem;
+      border-radius: 3px;
+    }
+    .cred-role {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+    .cred-row { font-family: var(--mono); font-size: 0.78rem; display: flex; gap: 0.6rem; line-height: 1.9; }
+    .cred-row span:first-child { color: var(--text-dim); width: 3rem; flex-shrink: 0; }
+    .cred-row strong { color: var(--text-head); }
+
+    /* ── DIVIDER ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    /* ── QUICK REF TABLE ── */
+    .quick-ref { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .quick-ref table { margin: 0; }
+    .quick-ref th { background: var(--bg3); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { padding: 1.5rem; }
+      .compat-grid, .creds { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-    <h1>📚 Angular Book Server - API Documentation</h1>
-    
-    <p><strong>Base URL:</strong> <code>http://localhost:3001</code></p>
-    <p><strong>Version:</strong> 2.0.0</p>
-    
-    <blockquote>
-        <p>A comprehensive Node.js Express server for testing the Angular Library Book Manager application. This server provides all necessary endpoints for books management, authentication, error handling scenarios, and <strong>real-time WebSocket streams for teaching RxJS operators</strong>.</p>
-    </blockquote>
+<div class="layout">
 
-    <hr>
+  <!-- ══ SIDEBAR ══ -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <span class="logo">📚 Book Server</span>
+      <span class="version">API REFERENCE · v2.0.0</span>
+    </div>
 
-    <h2>Table of Contents</h2>
-    <ul>
-        <li><a href="#authentication">Authentication Endpoints</a></li>
-        <li><a href="#public-books">Public Book Endpoints</a></li>
-        <li><a href="#protected-books">Protected Book Endpoints</a></li>
-        <li><a href="#testing">Testing Endpoints</a></li>
-        <li><a href="#rxjs-sockets">🎓 RxJS Teaching / WebSocket Streams</a></li>
-        <li><a href="#help-docs">📖 Help & Documentation</a></li>
-        <li><a href="#data-models">Data Models</a></li>
-        <li><a href="#error-codes">Error Codes</a></li>
-        <li><a href="#examples">Usage Examples</a></li>
-    </ul>
+    <div class="nav-group">
+      <span class="nav-section-label">V2 API — Library Manager</span>
+      <a href="#v2-auth"   class="nav-link">Authentication <span class="badge v2">V2</span></a>
+      <a href="#v2-books"  class="nav-link">Books <span class="badge v2">V2</span></a>
+      <a href="#v2-issues" class="nav-link">Issues / Borrowing <span class="badge v2">V2</span></a>
+      <a href="#v2-fines"  class="nav-link">Fines <span class="badge v2">V2</span></a>
+      <a href="#v2-users"  class="nav-link">Users <span class="badge lib">Lib</span></a>
+      <a href="#v2-stats"  class="nav-link">Stats &amp; Reports <span class="badge lib">Lib</span></a>
+    </div>
 
-    <hr>
+    <div class="nav-group">
+      <span class="nav-section-label">Legacy API — Books Project</span>
+      <a href="#legacy-auth"  class="nav-link">Auth <span class="badge legacy">Legacy</span></a>
+      <a href="#legacy-books" class="nav-link">Books <span class="badge legacy">Legacy</span></a>
+    </div>
 
-    <h2 id="authentication">🔐 Authentication Endpoints</h2>
+    <div class="nav-group">
+      <span class="nav-section-label">Utilities</span>
+      <a href="#testing"     class="nav-link">Testing Endpoints</a>
+      <a href="#rxjs-sockets" class="nav-link">RxJS / WebSockets</a>
+      <a href="#data-models" class="nav-link">Data Models</a>
+      <a href="#error-codes" class="nav-link">Error Codes</a>
+      <a href="#quick-start" class="nav-link">Quick Start</a>
+    </div>
+  </nav>
 
-    <h3>1. Login</h3>
-    <p><strong>Endpoint:</strong> <code>POST /auth/login</code></p>
-    <p><strong>Description:</strong> Authenticates a user and returns a JWT token. Accepts any username/password combination for testing purposes.</p>
-    <p><strong>Authentication Required:</strong> No</p>
+  <!-- ══ MAIN ══ -->
+  <main class="main">
 
-    <h4>Request Body</h4>
-    <pre><code>{
-  "username": "string",
+    <!-- PAGE HEADER -->
+    <h1 class="page-title">API Documentation</h1>
+    <p class="page-subtitle">
+      Node.js / Express backend · Base URL <code>http://localhost:3001</code> · Version 2.0.0
+    </p>
+
+    <!-- COMPATIBILITY BANNER -->
+    <div class="compat-banner">
+      <h3>🔗 Project Compatibility</h3>
+      <p style="font-size:0.83rem">This server supports two sets of projects. Both share the same running instance on port 3001.</p>
+      <div class="compat-grid">
+        <div class="compat-item v2">
+          <span class="compat-tag">✅ Library Manager Project</span>
+          <p>Use the <code>/api/*</code> endpoints. Full library management: authentication with real roles, book borrowing, returns, renewals, fines, and librarian admin. This is the <strong>primary API</strong> for the capstone project.</p>
+        </div>
+        <div class="compat-item legacy">
+          <span class="compat-tag">📦 Earlier Books Project</span>
+          <p>Use the <code>/books</code> and <code>/auth/*</code> endpoints. Simple CRUD on a book list — no roles, no borrowing, no fines. These endpoints remain fully functional and are <strong>backward compatible</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         V2 API
+    ══════════════════════════════════════ -->
+
+    <!-- V2 AUTH -->
+    <section class="section" id="v2-auth">
+      <h2 class="section-title">Authentication <span class="pill v2">V2 · /api/auth</span></h2>
+
+      <div class="callout tip">
+        <span class="callout-title">Test Credentials</span>
+        <div class="creds">
+          <div class="cred-card">
+            <span class="cred-role">Librarian</span>
+            <div class="cred-row"><span>user</span><strong>admin</strong></div>
+            <div class="cred-row"><span>pass</span><strong>admin123</strong></div>
+          </div>
+          <div class="cred-card">
+            <span class="cred-role">Regular User</span>
+            <div class="cred-row"><span>user</span><strong>user1</strong></div>
+            <div class="cred-row"><span>pass</span><strong>user123</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Register -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/auth/register</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Register a new user. Password is bcrypt-hashed. Role defaults to <code>user</code>. <code>fullName</code> defaults to username if omitted.</p>
+          <span class="field-label">Request Body</span>
+          <pre><code>{
+  "username": "string (required)",
+  "password": "string (required, min 6 chars)",
+  "email":    "string (required, valid format)",
+  "fullName": "string (optional — defaults to username)",
+  "phone":    "string (optional)",
+  "address":  "string (optional)"
+}</code></pre>
+          <span class="field-label">Success Response — 201</span>
+          <pre><code>{
+  "message": "Registration successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 104, "username": "newuser", "email": "newuser@example.com",
+    "fullName": "New User", "role": "user",
+    "maxBooksAllowed": 3, "currentBooksCount": 0,
+    "totalFines": 0, "paidFines": 0, "isActive": true,
+    "joinDate": "2026-02-14T10:30:00.000Z"
+  }
+}</code></pre>
+          <span class="field-label">Error Responses</span>
+          <table>
+            <thead><tr><th>Status</th><th>Message</th></tr></thead>
+            <tbody>
+              <tr><td class="status-400">400</td><td>Username, email, and password are required</td></tr>
+              <tr><td class="status-400">400</td><td>Invalid email format</td></tr>
+              <tr><td class="status-400">400</td><td>Password must be at least 6 characters</td></tr>
+              <tr><td class="status-409">409</td><td>Username already exists / Email already registered</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Login -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/auth/login</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Login and receive a JWT token + full user profile. Username field also accepts email address.</p>
+          <span class="field-label">Request Body</span>
+          <pre><code>{
+  "username": "string (username or email)",
   "password": "string"
 }</code></pre>
-
-    <h4>Success Response (200 OK)</h4>
-    <pre><code>{
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
   "message": "Login successful",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
-    "username": "admin"
+    "id": 100, "username": "admin", "email": "admin@example.com",
+    "fullName": "Library Administrator", "role": "librarian",
+    "maxBooksAllowed": 3, "currentBooksCount": 0,
+    "totalFines": 0, "paidFines": 0, "isActive": true,
+    "joinDate": "2026-02-14T00:00:00.000Z"
   }
 }</code></pre>
+          <span class="field-label">Error Responses</span>
+          <table>
+            <thead><tr><th>Status</th><th>Message</th></tr></thead>
+            <tbody>
+              <tr><td class="status-400">400</td><td>Username and password are required</td></tr>
+              <tr><td class="status-401">401</td><td>Invalid credentials</td></tr>
+              <tr><td class="status-403">403</td><td>Account is inactive. Please contact administrator.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-    <h4>Error Response (400 Bad Request)</h4>
-    <pre><code>{
-  "error": "Username and password required"
+      <!-- Profile -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/auth/profile</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Get the currently logged-in user's full profile.</p>
+          <span class="field-label">Headers</span>
+          <pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "id": 101, "username": "user1", "email": "user1@example.com",
+  "fullName": "John Doe", "role": "user",
+  "maxBooksAllowed": 3, "currentBooksCount": 2,
+  "totalFines": 5.50, "paidFines": 0, "isActive": true,
+  "joinDate": "2026-02-14T00:00:00.000Z"
 }</code></pre>
+        </div>
+      </div>
 
-    <h4>cURL Example</h4>
-    <pre><code>curl -X POST http://localhost:3001/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}'</code></pre>
-
-    <hr>
-
-    <h3>2. Logout</h3>
-    <p><strong>Endpoint:</strong> <code>POST /auth/logout</code></p>
-    <p><strong>Description:</strong> Invalidates the current JWT token.</p>
-    <p><strong>Authentication Required:</strong> Yes</p>
-
-    <h4>Headers</h4>
-    <pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
-
-    <h4>Success Response (200 OK)</h4>
-    <pre><code>{
-  "message": "Logout successful"
+      <!-- PUT Profile -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/auth/profile</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Update the current user's own profile. Send only the fields you want to change.</p>
+          <span class="field-label">Request Body (all optional)</span>
+          <pre><code>{
+  "fullName": "string",
+  "email":    "string",
+  "phone":    "string",
+  "address":  "string",
+  "password": "string (min 6 chars)"
 }</code></pre>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{ "message": "Profile updated successfully", "user": { ...updatedUser } }</code></pre>
+          <span class="field-label">Error Responses</span>
+          <table>
+            <thead><tr><th>Status</th><th>Message</th></tr></thead>
+            <tbody>
+              <tr><td class="status-400">400</td><td>Password must be at least 6 characters</td></tr>
+              <tr><td class="status-409">409</td><td>Email already in use</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-    <h4>Error Response (401 Unauthorized)</h4>
-    <pre><code>{
-  "error": "Access token required"
+      <!-- Logout -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/auth/logout</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Invalidates the current JWT token server-side.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{ "message": "Logout successful" }</code></pre>
+        </div>
+      </div>
+
+      <!-- Verify -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/auth/verify</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Check whether a token is still valid and get the current user info.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{ "valid": true, "user": { "id": 101, "username": "user1", "role": "user", ... } }</code></pre>
+        </div>
+      </div>
+
+    <!-- V2 BOOKS -->
+    <section class="section" id="v2-books">
+      <h2 class="section-title">Book Management <span class="pill v2">V2 · /api/books</span></h2>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/books/detailed</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Get all books with full details including stock counts, category, and cover image.</p>
+          <span class="field-label">Success Response — 200 (array)</span>
+          <pre><code>{
+  "id": 1, "userId": 1,
+  "title": "The Great Gatsby", "body": "A classic American novel...",
+  "isbn": "978-0743273565", "category": "Classic Literature",
+  "publishedYear": 1925,
+  "totalCopies": 5, "availableCopies": 3, "issuedCopies": 2,
+  "addedDate": "2026-02-14T00:00:00.000Z", "addedBy": "admin"
 }</code></pre>
+        </div>
+      </div>
 
-    <h4>cURL Example</h4>
-    <pre><code>curl -X POST http://localhost:3001/auth/logout \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"</code></pre>
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/books/search</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Search books by title, author, or ISBN using the <code>q</code> query parameter.</p>
+          <span class="field-label">Query Parameters</span>
+          <table>
+            <thead><tr><th>Param</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>q</code></td><td>string</td><td>Yes</td><td>Searches title, author, and ISBN</td></tr>
+            </tbody>
+          </table>
+          <span class="field-label">cURL Example</span>
+          <pre><code># Search by title/author/ISBN
+curl "http://localhost:3001/api/books/search?q=gatsby"</code></pre>
+        </div>
+      </div>
 
-    <hr>
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/books/available</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Returns only books where <code>availableCopies &gt; 0</code>.</p>
+        </div>
+      </div>
 
-    <h3>3. Verify Token</h3>
-    <p><strong>Endpoint:</strong> <code>GET /auth/verify</code></p>
-    <p><strong>Description:</strong> Verifies if the provided token is still valid.</p>
-    <p><strong>Authentication Required:</strong> Yes</p>
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/books/categories/list</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Returns a sorted list of all unique category strings. Useful for populating filter dropdowns.</p>
+          <span class="field-label">Success Response — 200 (array)</span>
+          <pre><code>["Classic Literature", "Dystopian", "Fantasy", "Fiction", "Romance", "Science Fiction"]</code></pre>
+        </div>
+      </div>
 
-    <h4>Headers</h4>
-    <pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/books/category/:category</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Filter books by category name (case-insensitive). Returns all books matching the given category.</p>
+        </div>
+      </div>
 
-    <h4>Success Response (200 OK)</h4>
-    <pre><code>{
-  "valid": true,
-  "user": {
-    "username": "admin"
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/books/detailed/:id</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Get a single book by its numeric ID. Returns full book object or 404.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/books/:id/availability</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Get detailed availability info for a specific book.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "bookId": 1, "title": "The Great Gatsby",
+  "totalCopies": 5, "availableCopies": 3, "issuedCopies": 2,
+  "isAvailable": true, "currentlyBorrowedBy": 2
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/books/create</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Add a new book to the library catalogue.</p>
+          <span class="field-label">Request Body</span>
+          <pre><code>{
+  "title":        "string (required)",
+  "body":         "string (required — description)",
+  "isbn":         "string (optional)",
+  "category":     "string (optional)",
+  "publishedYear":"number (optional)",
+  "totalCopies":  "number (optional — defaults to 1)",
+  "coverImage":   "string (optional)"
+}</code></pre>
+          <span class="field-label">Success Response — 201</span>
+          <pre><code>{
+  "message": "Book created successfully",
+  "book": { "id": 11, "title": "...", "availableCopies": 3, "addedBy": "admin", ... }
+}</code></pre>
+          <span class="field-label">Error Responses</span>
+          <table>
+            <thead><tr><th>Status</th><th>Message</th></tr></thead>
+            <tbody>
+              <tr><td class="status-400">400</td><td>Title and description are required</td></tr>
+              <tr><td class="status-403">403</td><td>Librarian access required</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/books/:id/update</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Update an existing book's details. Send only the fields you wish to change. Note: <code>totalCopies</code> cannot be reduced below the number of currently issued copies.</p>
+          <span class="field-label">Request Body (all optional)</span>
+          <pre><code>{
+  "title": "string", "body": "string",
+  "category": "string", "publishedYear": "number",
+  "totalCopies": "number", "coverImage": "string"
+}</code></pre>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{ "message": "Book updated successfully", "book": { ...updatedBook } }</code></pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method DELETE">DELETE</span>
+          <span class="endpoint-path">/api/books/:id/delete</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Remove a book from the catalogue. Fails if the book has active (unreturned) issues.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{ "message": "Book deleted successfully", "book": { ...deletedBook } }</code></pre>
+          <span class="field-label">Error Responses</span>
+          <table>
+            <thead><tr><th>Status</th><th>Message</th></tr></thead>
+            <tbody>
+              <tr><td class="status-400">400</td><td>Cannot delete book with active issues</td></tr>
+              <tr><td class="status-404">404</td><td>Book not found</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- V2 ISSUES -->
+    <section class="section" id="v2-issues">
+      <h2 class="section-title">Issue Management — Borrowing <span class="pill v2">V2 · /api/issues</span></h2>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/issues</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Borrow a book. Due date is automatically set to 14 days from now.</p>
+          <span class="field-label">Request Body</span>
+          <pre><code>{ "bookId": 1 }</code></pre>
+          <span class="field-label">Success Response — 201</span>
+          <pre><code>{
+  "message": "Book issued successfully",
+  "issue": {
+    "id": 1000, "bookId": 1, "userId": 101,
+    "issueDate": "2026-02-14T10:30:00.000Z",
+    "dueDate":   "2026-02-28T10:30:00.000Z",
+    "returnDate": null, "status": "issued",
+    "renewalCount": 0, "maxRenewals": 2,
+    "fineAmount": 0, "finePaid": false,
+    "issuedBy": "user1", "returnedTo": null
+  },
+  "book": { "id": 1, "title": "The Great Gatsby" }
+}</code></pre>
+          <span class="field-label">Error Responses</span>
+          <table>
+            <thead><tr><th>Status</th><th>Message</th></tr></thead>
+            <tbody>
+              <tr><td class="status-400">400</td><td>Book not available — all copies currently issued</td></tr>
+              <tr><td class="status-400">400</td><td>Cannot borrow more than 5 books at a time</td></tr>
+              <tr><td class="status-400">400</td><td>Cannot borrow books with overdue items</td></tr>
+              <tr><td class="status-400">400</td><td>Cannot borrow books with unpaid fines exceeding $5</td></tr>
+              <tr><td class="status-404">404</td><td>Book not found</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/issues</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Get issues list. Librarians receive all issues; regular users receive only their own. Each issue is enriched with book and user details.</p>
+          <span class="field-label">Success Response — 200 (array)</span>
+          <pre><code>[{
+  "id": 1000, "bookId": 1, "userId": 101,
+  "issueDate": "2026-02-14T10:30:00.000Z",
+  "dueDate":   "2026-02-28T10:30:00.000Z",
+  "returnDate": null, "status": "issued",
+  "renewalCount": 0, "maxRenewals": 2,
+  "fineAmount": 0, "finePaid": false,
+  "book": { "id": 1, "title": "The Great Gatsby", "isbn": "978-0743273565" },
+  "user": { "id": 101, "username": "user1", "fullName": "John Doe" }
+}]</code></pre>
+        </div>
+      </div>
+
+      <!-- GET single issue -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/issues/:id</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Get a single issue by ID. Users can only access their own issues; librarians can access any.</p>
+        </div>
+      </div>
+
+      <!-- GET issues by user -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/issues/user/:userId</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Get all <strong>active</strong> (non-returned) issues for a specific user. Users can only view their own; librarians can view anyone's.</p>
+        </div>
+      </div>
+
+      <!-- GET issues by book (librarian) -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/issues/book/:bookId</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Get full issue history for a specific book, enriched with user details.</p>
+        </div>
+      </div>
+
+      <!-- GET overdue -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/issues/overdue/all</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Updates overdue status and returns all currently overdue issues with book, user, and live fine calculation.</p>
+          <span class="field-label">Success Response — 200 (array)</span>
+          <pre><code>[{
+  "id": 1000, "bookId": 1, "userId": 101, "status": "overdue",
+  "dueDate": "2026-02-10T10:30:00.000Z",
+  "currentFine": 2.00,
+  "book": { "id": 1, "title": "The Great Gatsby" },
+  "user": { "id": 101, "username": "user1", "fullName": "John Doe", "email": "user1@example.com" }
+}]</code></pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/issues/:id/return</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Return a borrowed book. Fine is automatically calculated if overdue.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "message": "Book returned successfully",
+  "issue": {
+    "id": 1000, "status": "returned",
+    "returnDate": "2026-03-15T10:30:00.000Z",
+    "fineAmount": 6.50, "finePaid": false
+  },
+  "fine": 6.50,
+  "hasFine": true
+}</code></pre>
+          <div class="callout warn" style="margin-top:0.8rem">
+            <span class="callout-title">Fine Formula</span>
+            <p><code>(daysOverdue − 1 grace day) × $0.50/day</code>, capped at <strong>$20.00</strong>.<br>
+            Example: 15 days overdue → (15 − 1) × 0.50 = <strong>$7.00</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/issues/:id/renew</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Extend the due date by 14 days. Maximum 2 renewals per issue. Overdue books cannot be renewed.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "message": "Book renewed successfully",
+  "issue": { "id": 1000, "dueDate": "2026-03-14T10:30:00.000Z", "renewalCount": 1, "maxRenewals": 2 },
+  "newDueDate": "2026-03-14T10:30:00.000Z",
+  "renewalsRemaining": 1
+}</code></pre>
+          <span class="field-label">Error Responses</span>
+          <table>
+            <thead><tr><th>Status</th><th>Message</th></tr></thead>
+            <tbody>
+              <tr><td class="status-400">400</td><td>Cannot renew overdue books</td></tr>
+              <tr><td class="status-400">400</td><td>Maximum renewal limit reached (2 renewals)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- V2 FINES -->
+    <section class="section" id="v2-fines">
+      <h2 class="section-title">Fine Management <span class="pill v2">V2 · /api/fines</span></h2>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/fines/user/:userId</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Get fine summary for a user. Users can only see their own fines; librarians can see anyone's.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "totalFines": 7.50,
+  "paidFines": 0,
+  "unpaidFines": 7.50,
+  "unpaidIssuesCount": 1,
+  "issuesWithFines": [
+    {
+      "issueId": 1000,
+      "bookTitle": "The Great Gatsby",
+      "fineAmount": 7.50,
+      "finePaid": false
+    }
+  ]
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/fines/:issueId/pay</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Mark a fine as paid. Users can only pay their own fines; librarians can pay anyone's.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "message": "Fine paid successfully",
+  "amountPaid": 7.50,
+  "remainingFines": 0
+}</code></pre>
+          <span class="field-label">Error Responses</span>
+          <table>
+            <thead><tr><th>Status</th><th>Message</th></tr></thead>
+            <tbody>
+              <tr><td class="status-400">400</td><td>No fine to pay for this issue</td></tr>
+              <tr><td class="status-400">400</td><td>Fine already paid</td></tr>
+              <tr><td class="status-404">404</td><td>Issue not found</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pay all fines -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/api/fines/user/:userId/pay-all</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Pay all unpaid fines for a user at once.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "message": "All fines paid successfully",
+  "amountPaid": 15.00,
+  "issuesPaid": 3,
+  "remainingFines": 0
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Calculate fine preview -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/fines/calculate/:issueId</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Preview the current fine for an issue without marking it as paid.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "issueId": 1000,
+  "dueDate": "2026-02-10T10:30:00.000Z",
+  "gracePeriodDays": 1,
+  "overdueDays": 5,
+  "finePerDay": 0.50,
+  "calculatedFine": 2.50,
+  "maxFinePerBook": 20.00,
+  "isOverdue": true,
+  "status": "overdue"
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Fines report (librarian) -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/fines/report</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Get a full fines report across all users.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "summary": {
+    "totalUnpaidFines": 45.00, "totalPaidFines": 12.50,
+    "usersWithUnpaidFines": 2, "totalUsersWithFines": 3
+  },
+  "users": [
+    {
+      "userId": 101, "username": "user1", "fullName": "John Doe",
+      "unpaidFines": 7.50, "paidFines": 0, "unpaidIssuesCount": 1
+    }
+  ]
+}</code></pre>
+    </section>
+
+    <!-- V2 USERS -->
+    <section class="section" id="v2-users">
+      <h2 class="section-title">User Management <span class="pill v2">V2</span> <span class="pill legacy" style="background:rgba(139,92,246,0.12);color:var(--purple);border-color:rgba(139,92,246,0.2)">Librarian Only</span></h2>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/users</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Get list of all registered users. Passwords are never included in responses.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/users/:id</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Get a single user by ID. Password is never included in the response.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method PUT">PUT</span>
+          <span class="endpoint-path">/api/users/:id</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Update user fields. Use <code>isActive: true/false</code> to activate or deactivate accounts.</p>
+          <span class="field-label">Request Body (all optional)</span>
+          <pre><code>{
+  "fullName": "string", "email": "string",
+  "phone": "string", "address": "string",
+  "role": "user | librarian",
+  "isActive": "boolean",
+  "maxBooksAllowed": "number"
+}</code></pre>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{ "message": "User updated successfully", "user": { ...updatedUser } }</code></pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method DELETE">DELETE</span>
+          <span class="endpoint-path">/api/users/:id</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Deactivates a user account (sets <code>isActive: false</code>). Does not permanently delete the user.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{ "message": "User deactivated successfully", "user": { ...user, "isActive": false } }</code></pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/users/:id/issues</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Get the full borrowing history for a user, with each issue enriched with book details.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/users/:id/stats</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Get borrowing statistics for a specific user.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "totalBorrowed": 8,
+  "currentlyBorrowed": 2,
+  "returned": 5,
+  "overdue": 1,
+  "totalFines": 5.50,
+  "paidFines": 0
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- V2 STATS -->
+    <section class="section" id="v2-stats">
+      <h2 class="section-title">Statistics &amp; Reports <span class="pill v2">V2</span> <span class="pill legacy" style="background:rgba(139,92,246,0.12);color:var(--purple);border-color:rgba(139,92,246,0.2)">Librarian Only</span></h2>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/stats/dashboard</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Comprehensive library statistics for the admin dashboard.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "books": {
+    "totalBooks": 50, "uniqueTitles": 10,
+    "availableBooks": 45, "issuedBooks": 5,
+    "utilizationRate": "10.0"
+  },
+  "users": {
+    "totalUsers": 4, "activeUsers": 4,
+    "inactiveUsers": 0, "usersWithBooks": 2
+  },
+  "issues": {
+    "totalIssued": 15, "activeIssues": 5,
+    "overdueIssues": 1, "returnedIssues": 10,
+    "overdueRate": "6.7"
+  },
+  "fines": {
+    "totalUnpaidFines": "7.50", "totalPaidFines": "25.00",
+    "usersWithFines": 1
   }
 }</code></pre>
+        </div>
+      </div>
 
-    <h4>Error Response (403 Forbidden)</h4>
-    <pre><code>{
-  "error": "Invalid or expired token"
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/stats/books</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Detailed book statistics: per-book issue counts, category breakdown, most/least popular.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "summary": { "totalTitles": 10, "totalCopies": 50, "totalAvailable": 45, "totalIssued": 5 },
+  "byCategory": { "Fiction": { "count": 3, "totalCopies": 15, "available": 12 } },
+  "mostPopular": [{ "id": 1, "title": "...", "timesIssued": 8, ... }],
+  "leastPopular": [...]
 }</code></pre>
+        </div>
+      </div>
 
-    <h4>cURL Example</h4>
-    <pre><code>curl http://localhost:3001/auth/verify \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"</code></pre>
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/stats/users</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Detailed user statistics: most active users, users with overdue items.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "summary": { "totalUsers": 4, "activeUsers": 4, "usersWithBooks": 2, "usersWithFines": 1 },
+  "mostActiveUsers": [{ "id": 101, "username": "user1", "totalBorrowed": 8, ... }],
+  "usersWithOverdue": [...]
+}</code></pre>
+        </div>
+      </div>
 
-    <hr>
-
-    <h2 id="public-books">🌐 Public Book Endpoints</h2>
-    <p>These endpoints are accessible without authentication.</p>
-
-    <h3>1. Get All Books</h3>
-    <p><strong>Endpoint:</strong> <code>GET /books</code></p>
-    <p><strong>Description:</strong> Retrieves all books in the library.</p>
-    <p><strong>Authentication Required:</strong> No</p>
-
-    <h4>Success Response (200 OK)</h4>
-    <pre><code>[
-  {
-    "userId": 1,
-    "id": 1,
-    "title": "The Great Gatsby",
-    "body": "A classic American novel set in the Jazz Age..."
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/stats/issues</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Issue statistics: status breakdown, issues by month, average loan duration.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "summary": {
+    "totalIssues": 15, "activeIssues": 5, "overdueIssues": 1, "returnedIssues": 10,
+    "overdueRate": "6.7", "averageDurationDays": "12.4"
   },
-  {
-    "userId": 2,
-    "id": 2,
-    "title": "To Kill a Mockingbird",
-    "body": "A gripping tale of racial injustice..."
+  "byStatus": { "issued": 4, "overdue": 1, "returned": 10 },
+  "byMonth": { "2026-01": 8, "2026-02": 7 }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/stats/reports/overdue</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">All currently overdue issues with full user and book details, days overdue, and fine amount. Sorted by most days overdue first.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "summary": {
+    "totalOverdue": 1,
+    "totalFinesAccrued": "7.50",
+    "unpaidFinesCount": 1
   },
-  ...
-]</code></pre>
+  "overdueIssues": [
+    {
+      "issueId": 1000,
+      "book": { "id": 1, "title": "The Great Gatsby", "isbn": "978-0743273565" },
+      "user": { "id": 101, "username": "user1", "fullName": "John Doe", "email": "user1@example.com", "phone": "..." },
+      "issueDate": "2026-01-15", "dueDate": "2026-01-29",
+      "daysOverdue": 16, "currentFine": 7.50, "finePaid": false
+    }
+  ]
+}</code></pre>
+        </div>
+      </div>
 
-    <h4>cURL Example</h4>
-    <pre><code>curl http://localhost:3001/books</code></pre>
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/api/stats/reports/popular</span>
+          <span class="auth-badge auth-lib">Librarian Only</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Most and least popular books by total issue count.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{
+  "mostPopular": [
+    { "id": 1, "title": "...", "category": "...", "timesIssued": 8, "currentlyIssued": 2, "availableCopies": 3, "totalCopies": 5 }
+  ],
+  "leastPopular": [{ "timesIssued": 0, ... }]
+}</code></pre>
+        </div>
+      </div>
+    </section>
 
     <hr>
 
-    <h3>2. Get Book by ID</h3>
-    <p><strong>Endpoint:</strong> <code>GET /books/:id</code></p>
-    <p><strong>Description:</strong> Retrieves a specific book by its ID.</p>
-    <p><strong>Authentication Required:</strong> No</p>
+    <!-- ══════════════════════════════════════
+         LEGACY API
+    ══════════════════════════════════════ -->
 
-    <h4>URL Parameters</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Type</th>
-                <th>Description</th>
-            </tr>
-        </thead>
+    <section class="section" id="legacy-auth">
+      <h2 class="section-title">Legacy Authentication <span class="pill legacy">Earlier Books Project</span></h2>
+
+      <div class="callout warn">
+        <span class="callout-title">For the earlier Books Project only</span>
+        <p>These endpoints use <code>/auth/*</code> (no <code>/api</code> prefix). They accept <strong>any username/password combination</strong> — no real validation. The token returned works with the legacy <code>/books</code> endpoints. If you are building the Library Manager project, use <code>/api/auth/*</code> instead.</p>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/auth/login</span>
+          <span class="auth-badge auth-no">No Auth</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Accepts any username/password. Returns a JWT token.</p>
+          <span class="field-label">Request Body</span>
+          <pre><code>{ "username": "string", "password": "string" }</code></pre>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{ "message": "Login successful", "token": "eyJhbGci...", "user": { "username": "admin" } }</code></pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method POST">POST</span>
+          <span class="endpoint-path">/auth/logout</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim)">Invalidates the current JWT token server-side.</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method GET">GET</span>
+          <span class="endpoint-path">/auth/verify</span>
+          <span class="auth-badge auth-yes">Auth Required</span>
+        </div>
+        <div class="endpoint-body">
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Check whether a token is still valid.</p>
+          <span class="field-label">Success Response — 200</span>
+          <pre><code>{ "valid": true, "user": { "username": "admin" } }</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="legacy-books">
+      <h2 class="section-title">Legacy Book Endpoints <span class="pill legacy">Earlier Books Project</span></h2>
+
+      <div class="callout warn">
+        <span class="callout-title">For the earlier Books Project only</span>
+        <p>These use <code>/books</code> (no <code>/api</code> prefix) and return a simplified book object: <code>{ id, userId, title, body }</code> — no author, category, or stock fields. Library Manager students should use <code>/api/books</code> instead.</p>
+      </div>
+
+      <div class="quick-ref">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method GET" style="display:inline-block">GET</span></td><td><code>/books</code></td><td>No</td><td>Get all books (simplified model)</td></tr>
+            <tr><td><span class="method GET" style="display:inline-block">GET</span></td><td><code>/books/:id</code></td><td>No</td><td>Get single book by ID</td></tr>
+            <tr><td><span class="method POST" style="display:inline-block">POST</span></td><td><code>/books</code></td><td>Yes</td><td>Create a book — body: <code>{ title, body, userId? }</code></td></tr>
+            <tr><td><span class="method PUT" style="display:inline-block">PUT</span></td><td><code>/books/:id</code></td><td>Yes</td><td>Full update of a book</td></tr>
+            <tr><td><span class="method PATCH" style="display:inline-block">PATCH</span></td><td><code>/books/:id</code></td><td>Yes</td><td>Partial update of a book</td></tr>
+            <tr><td><span class="method DELETE" style="display:inline-block">DELETE</span></td><td><code>/books/:id</code></td><td>Yes</td><td>Delete a book</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr>
+
+    <!-- ══ TESTING ENDPOINTS ══ -->
+    <section class="section" id="testing">
+      <h2 class="section-title">Testing Endpoints</h2>
+
+      <div class="quick-ref">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method GET" style="display:inline-block">GET</span></td><td><code>/error/500</code></td><td>Forces a 500 Internal Server Error response — for testing error interceptors</td></tr>
+            <tr><td><span class="method GET" style="display:inline-block">GET</span></td><td><code>/error/timeout</code></td><td>Simulates a 30-second hanging request — for testing timeout handling</td></tr>
+            <tr><td><span class="method POST" style="display:inline-block">POST</span></td><td><code>/reset</code></td><td>Resets all in-memory data to initial seed state and clears all tokens — <strong>Librarian auth required</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══ RXJS / WEBSOCKETS ══ -->
+    <section class="section" id="rxjs-sockets">
+      <h2 class="section-title">RxJS Teaching / WebSocket Streams</h2>
+
+      <p style="font-size:0.83rem;margin-bottom:1rem">Real-time streams for teaching RxJS operators. Connect via Socket.io and configure data rate, error injection, and duplicates to demonstrate any operator.</p>
+
+      <div class="callout info">
+        <span class="callout-title">Connection</span>
+        <p>WebSocket URL: <code>ws://localhost:3001</code><br>Install client: <code>npm install socket.io-client</code></p>
+      </div>
+
+      <span class="field-label" style="margin-top:1rem">HTTP Control Endpoints</span>
+      <div class="quick-ref">
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method GET" style="display:inline-block">GET</span></td><td><code>/rxjs/streams</code></td><td>List currently active streams and their config</td></tr>
+            <tr><td><span class="method POST" style="display:inline-block">POST</span></td><td><code>/rxjs/streams/start</code></td><td>Start a custom stream (see config below)</td></tr>
+            <tr><td><span class="method POST" style="display:inline-block">POST</span></td><td><code>/rxjs/streams/stop/:name</code></td><td>Stop a named stream</td></tr>
+            <tr><td><span class="method POST" style="display:inline-block">POST</span></td><td><code>/rxjs/streams/stop-all</code></td><td>Stop all running streams</td></tr>
+            <tr><td><span class="method GET" style="display:inline-block">GET</span></td><td><code>/rxjs/presets</code></td><td>List pre-configured teaching presets</td></tr>
+            <tr><td><span class="method POST" style="display:inline-block">POST</span></td><td><code>/rxjs/presets/:name</code></td><td>Start a preset scenario</td></tr>
+            <tr><td><span class="method GET" style="display:inline-block">GET</span></td><td><code>/rxjs/operators-guide</code></td><td>Get the full operators teaching guide</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <span class="field-label" style="margin-top:1rem">Stream Config Object (POST /rxjs/streams/start)</span>
+      <pre><code>{
+  "streamName":     "books",   // "books" or "issues"
+  "interval":       2000,      // ms between emissions
+  "duration":       60000,     // total ms to run
+  "errorRate":      10,        // % chance of error per emission
+  "duplicateRate":  0,         // % chance of duplicate
+  "delayVariation": 500,       // random delay variance (ms)
+  "burstMode":      false      // emit in bursts instead of steady
+}</code></pre>
+
+      <span class="field-label" style="margin-top:1rem">Available Presets</span>
+      <table>
+        <thead><tr><th>Preset</th><th>Best for teaching</th></tr></thead>
         <tbody>
-            <tr>
-                <td><code>id</code></td>
-                <td>number</td>
-                <td>Unique book identifier</td>
-            </tr>
+          <tr><td><code>basic</code></td><td><code>map</code>, <code>filter</code>, <code>tap</code></td></tr>
+          <tr><td><code>throttleDebounce</code></td><td><code>throttleTime</code> vs <code>debounceTime</code></td></tr>
+          <tr><td><code>errorHandling</code></td><td><code>catchError</code>, <code>retry</code>, <code>retryWhen</code></td></tr>
+          <tr><td><code>distinctDuplicates</code></td><td><code>distinctUntilChanged</code>, <code>distinct</code></td></tr>
+          <tr><td><code>combination</code></td><td><code>combineLatest</code>, <code>merge</code>, <code>zip</code></td></tr>
+          <tr><td><code>switching</code></td><td><code>switchMap</code>, <code>mergeMap</code>, <code>concatMap</code></td></tr>
+          <tr><td><code>buffering</code></td><td><code>buffer</code>, <code>bufferTime</code>, <code>windowTime</code></td></tr>
+          <tr><td><code>timing</code></td><td><code>delay</code>, <code>timeout</code>, <code>timeoutWith</code></td></tr>
         </tbody>
-    </table>
+      </table>
 
-    <h4>Success Response (200 OK)</h4>
-    <pre><code>{
-  "userId": 1,
-  "id": 1,
-  "title": "The Great Gatsby",
-  "body": "A classic American novel set in the Jazz Age..."
-}</code></pre>
-
-    <h4>Error Response (404 Not Found)</h4>
-    <pre><code>{
-  "error": "Book not found"
-}</code></pre>
-
-    <h4>cURL Example</h4>
-    <pre><code>curl http://localhost:3001/books/1</code></pre>
-
-    <hr>
-
-    <h2 id="protected-books">🔒 Protected Book Endpoints</h2>
-    <p>These endpoints require a valid JWT token in the Authorization header.</p>
-
-    <h3>1. Create Book</h3>
-    <p><strong>Endpoint:</strong> <code>POST /books</code></p>
-    <p><strong>Description:</strong> Creates a new book in the library.</p>
-    <p><strong>Authentication Required:</strong> Yes</p>
-
-    <h4>Headers</h4>
-    <pre><code>Authorization: Bearer &lt;token&gt;
-Content-Type: application/json</code></pre>
-
-    <h4>Request Body</h4>
-    <pre><code>{
-  "title": "string (required)",
-  "body": "string (required)",
-  "userId": "number (optional, defaults to 1)"
-}</code></pre>
-
-    <h4>Success Response (201 Created)</h4>
-    <pre><code>{
-  "userId": 1,
-  "id": 11,
-  "title": "New Book Title",
-  "body": "Book description goes here"
-}</code></pre>
-
-    <h4>Error Responses</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Status Code</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>400</td>
-                <td>Title and body are required</td>
-            </tr>
-            <tr>
-                <td>401</td>
-                <td>Access token required</td>
-            </tr>
-            <tr>
-                <td>403</td>
-                <td>Invalid or expired token</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h4>cURL Example</h4>
-    <pre><code>curl -X POST http://localhost:3001/books \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "New Book Title",
-    "body": "Book description goes here",
-    "userId": 1
-  }'</code></pre>
-
-    <hr>
-
-    <h3>2. Update Book (Full)</h3>
-    <p><strong>Endpoint:</strong> <code>PUT /books/:id</code></p>
-    <p><strong>Description:</strong> Completely updates an existing book.</p>
-    <p><strong>Authentication Required:</strong> Yes</p>
-
-    <h4>URL Parameters</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Type</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><code>id</code></td>
-                <td>number</td>
-                <td>Book ID to update</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h4>Headers</h4>
-    <pre><code>Authorization: Bearer &lt;token&gt;
-Content-Type: application/json</code></pre>
-
-    <h4>Request Body</h4>
-    <pre><code>{
-  "title": "string",
-  "body": "string",
-  "userId": "number"
-}</code></pre>
-
-    <h4>Success Response (200 OK)</h4>
-    <pre><code>{
-  "userId": 1,
-  "id": 1,
-  "title": "Updated Title",
-  "body": "Updated description"
-}</code></pre>
-
-    <h4>Error Response (404 Not Found)</h4>
-    <pre><code>{
-  "error": "Book not found"
-}</code></pre>
-
-    <h4>cURL Example</h4>
-    <pre><code>curl -X PUT http://localhost:3001/books/1 \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Updated Title",
-    "body": "Updated description",
-    "userId": 1
-  }'</code></pre>
-
-    <hr>
-
-    <h3>3. Update Book (Partial)</h3>
-    <p><strong>Endpoint:</strong> <code>PATCH /books/:id</code></p>
-    <p><strong>Description:</strong> Partially updates specific fields of a book.</p>
-    <p><strong>Authentication Required:</strong> Yes</p>
-
-    <h4>URL Parameters</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Type</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><code>id</code></td>
-                <td>number</td>
-                <td>Book ID to update</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h4>Headers</h4>
-    <pre><code>Authorization: Bearer &lt;token&gt;
-Content-Type: application/json</code></pre>
-
-    <h4>Request Body</h4>
-    <pre><code>{
-  "title": "string (optional)",
-  "body": "string (optional)",
-  "userId": "number (optional)"
-}</code></pre>
-
-    <h4>Success Response (200 OK)</h4>
-    <pre><code>{
-  "userId": 1,
-  "id": 1,
-  "title": "New Title Only",
-  "body": "Original description"
-}</code></pre>
-
-    <h4>cURL Example</h4>
-    <pre><code>curl -X PATCH http://localhost:3001/books/1 \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -H "Content-Type: application/json" \
-  -d '{"title": "New Title Only"}'</code></pre>
-
-    <hr>
-
-    <h3>4. Delete Book</h3>
-    <p><strong>Endpoint:</strong> <code>DELETE /books/:id</code></p>
-    <p><strong>Description:</strong> Deletes a book from the library.</p>
-    <p><strong>Authentication Required:</strong> Yes</p>
-
-    <h4>URL Parameters</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Type</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><code>id</code></td>
-                <td>number</td>
-                <td>Book ID to delete</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h4>Headers</h4>
-    <pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
-
-    <h4>Success Response (200 OK)</h4>
-    <pre><code>{
-  "message": "Book deleted successfully",
-  "id": 1
-}</code></pre>
-
-    <h4>Error Response (404 Not Found)</h4>
-    <pre><code>{
-  "error": "Book not found"
-}</code></pre>
-
-    <h4>cURL Example</h4>
-    <pre><code>curl -X DELETE http://localhost:3001/books/1 \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"</code></pre>
-
-    <hr>
-
-    <h2 id="testing">🧪 Testing Endpoints</h2>
-
-    <h3>1. Test 500 Error</h3>
-    <p><strong>Endpoint:</strong> <code>GET /error/500</code></p>
-    <p><strong>Description:</strong> Returns a 500 Internal Server Error for testing error handling.</p>
-    <p><strong>Authentication Required:</strong> No</p>
-
-    <h4>Response (500 Internal Server Error)</h4>
-    <pre><code>{
-  "error": "Internal server error"
-}</code></pre>
-
-    <h4>cURL Example</h4>
-    <pre><code>curl http://localhost:3001/error/500</code></pre>
-
-    <hr>
-
-    <h3>2. Test Timeout</h3>
-    <p><strong>Endpoint:</strong> <code>GET /error/timeout</code></p>
-    <p><strong>Description:</strong> Simulates a long-running request (30 seconds) for timeout testing.</p>
-    <p><strong>Authentication Required:</strong> No</p>
-
-    <h4>cURL Example</h4>
-    <pre><code>curl http://localhost:3001/error/timeout</code></pre>
-
-    <hr>
-
-    <h3>3. Reset Data</h3>
-    <p><strong>Endpoint:</strong> <code>POST /reset</code></p>
-    <p><strong>Description:</strong> Resets all books to initial state and clears all authentication tokens.</p>
-    <p><strong>Authentication Required:</strong> No</p>
-
-    <h4>Success Response (200 OK)</h4>
-    <pre><code>{
-  "message": "Data reset successfully"
-}</code></pre>
-
-    <h4>cURL Example</h4>
-    <pre><code>curl -X POST http://localhost:3001/reset</code></pre>
-
-    <hr>
-
-    <h2 id="rxjs-sockets">🎓 RxJS Teaching / WebSocket Streams</h2>
-    <p>Real-time WebSocket streams for teaching RxJS operators. This server provides configurable data streams (books and issues) that emit at custom intervals with error injection, duplicates, and delays for comprehensive operator teaching.</p>
-
-    <h3>WebSocket Connection</h3>
-    <p><strong>URL:</strong> <code>ws://localhost:3001</code></p>
-    <p><strong>Library:</strong> Socket.io (install in Angular: <code>npm install socket.io-client</code>)</p>
-
-    <h3>HTTP Control Endpoints</h3>
-
-    <h4>1. Get Active Streams</h4>
-    <p><strong>Endpoint:</strong> <code>GET /rxjs/streams</code></p>
-    <p><strong>Description:</strong> Returns currently active streams and their configurations.</p>
-    <pre><code>curl http://localhost:3001/rxjs/streams</code></pre>
-
-    <h4>2. Start Custom Stream</h4>
-    <p><strong>Endpoint:</strong> <code>POST /rxjs/streams/start</code></p>
-    <p><strong>Description:</strong> Start a stream with custom configuration.</p>
-    <pre><code>{
-  "streamName": "books",
-  "interval": 2000,
-  "duration": 60000,
-  "errorRate": 10,
-  "duplicateRate": 0,
-  "delayVariation": 500,
-  "burstMode": false
-}</code></pre>
-
-    <h4>3. Stop Stream</h4>
-    <p><strong>Endpoint:</strong> <code>POST /rxjs/streams/stop/:streamName</code></p>
-    <p><strong>Description:</strong> Stop a specific stream.</p>
-
-    <h4>4. Stop All Streams</h4>
-    <p><strong>Endpoint:</strong> <code>POST /rxjs/streams/stop-all</code></p>
-    <p><strong>Description:</strong> Stop all running streams.</p>
-
-    <h4>5. Get Preset Configurations</h4>
-    <p><strong>Endpoint:</strong> <code>GET /rxjs/presets</code></p>
-    <p><strong>Description:</strong> Get pre-configured scenarios for teaching specific operators.</p>
-    <p><strong>Available Presets:</strong></p>
-    <ul>
-        <li><code>basic</code> - Simple streams for map, filter, tap</li>
-        <li><code>throttleDebounce</code> - Fast bursts for throttle vs debounce</li>
-        <li><code>errorHandling</code> - Random errors for catchError, retry</li>
-        <li><code>distinctDuplicates</code> - Duplicates for distinctUntilChanged</li>
-        <li><code>combination</code> - Two streams for combineLatest, merge, zip</li>
-        <li><code>switching</code> - Variable delays for switchMap, mergeMap</li>
-        <li><code>buffering</code> - Fast stream for buffer operators</li>
-        <li><code>timing</code> - Variable timing for delay, timeout</li>
-    </ul>
-
-    <h4>6. Start Preset</h4>
-    <p><strong>Endpoint:</strong> <code>POST /rxjs/presets/:presetName</code></p>
-    <p><strong>Example:</strong></p>
-    <pre><code>curl -X POST http://localhost:3001/rxjs/presets/combination</code></pre>
-
-    <h4>7. Get Operators Guide</h4>
-    <p><strong>Endpoint:</strong> <code>GET /rxjs/operators-guide</code></p>
-    <p><strong>Description:</strong> Get comprehensive guide on RxJS operators and what to teach.</p>
-
-    <h3>Socket Events</h3>
-
-    <h4>Client to Server Events</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Event</th>
-                <th>Data</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><code>start-stream</code></td>
-                <td>config object</td>
-                <td>Request to start a stream</td>
-            </tr>
-            <tr>
-                <td><code>stop-stream</code></td>
-                <td>streamName string</td>
-                <td>Request to stop a stream</td>
-            </tr>
-            <tr>
-                <td><code>get-configs</code></td>
-                <td>-</td>
-                <td>Request current configurations</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h4>Server to Client Events</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Event</th>
-                <th>Data</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><code>books</code></td>
-                <td>Book object</td>
-                <td>New book data emission</td>
-            </tr>
-            <tr>
-                <td><code>books-error</code></td>
-                <td>Error object</td>
-                <td>Error in books stream</td>
-            </tr>
-            <tr>
-                <td><code>books-complete</code></td>
-                <td>Summary object</td>
-                <td>Books stream completed</td>
-            </tr>
-            <tr>
-                <td><code>issues</code></td>
-                <td>Issue object</td>
-                <td>New issue data emission</td>
-            </tr>
-            <tr>
-                <td><code>issues-error</code></td>
-                <td>Error object</td>
-                <td>Error in issues stream</td>
-            </tr>
-            <tr>
-                <td><code>issues-complete</code></td>
-                <td>Summary object</td>
-                <td>Issues stream completed</td>
-            </tr>
-            <tr>
-                <td><code>stream-started</code></td>
-                <td>Config confirmation</td>
-                <td>Confirmation stream started</td>
-            </tr>
-            <tr>
-                <td><code>stream-stopped</code></td>
-                <td>Stream name</td>
-                <td>Notification stream stopped</td>
-            </tr>
-            <tr>
-                <td><code>stream-configs</code></td>
-                <td>Configs object</td>
-                <td>Current stream configurations</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h3>Angular Integration Example</h3>
-    <pre><code>import { Injectable } from '@angular/core';
+      <span class="field-label" style="margin-top:1rem">Angular Integration Skeleton</span>
+      <pre><code>import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Observable, fromEvent } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class SocketService {
-  private socket: Socket;
+  private socket: Socket = io('http://localhost:3001');
 
-  constructor() {
-    this.socket = io('http://localhost:3001');
-  }
+  // Wrap socket events as Observables
+  onBooks(): Observable&lt;any&gt;  { return fromEvent(this.socket, 'books'); }
+  onIssues(): Observable&lt;any&gt; { return fromEvent(this.socket, 'issues'); }
 
-  // Convert socket events to Observables
-  onBooks(): Observable&lt;any&gt; {
-    return fromEvent(this.socket, 'books');
-  }
+  startStream(config: any): void { this.socket.emit('start-stream', config); }
+  stopStream(name: string): void { this.socket.emit('stop-stream', name); }
+}</code></pre>
+    </section>
 
-  onIssues(): Observable&lt;any&gt; {
-    return fromEvent(this.socket, 'issues');
-  }
+    <!-- ══ DATA MODELS ══ -->
+    <section class="section" id="data-models">
+      <h2 class="section-title">Data Models</h2>
 
-  // Emit events to server
-  startStream(config: any): void {
-    this.socket.emit('start-stream', config);
-  }
-
-  stopStream(name: string): void {
-    this.socket.emit('stop-stream', name);
-  }
+      <span class="field-label">Book — V2 (/api/books)</span>
+      <pre><code>{
+  id, userId, title, body, isbn, category,
+  publishedYear, coverImage,
+  totalCopies, availableCopies, issuedCopies,
+  addedDate, addedBy
 }</code></pre>
 
-    <hr>
+      <span class="field-label" style="margin-top:1rem">Book — Legacy (/books)</span>
+      <pre><code>{ userId, id, title, body }</code></pre>
 
-    <h2 id="help-docs">📖 Help & Documentation</h2>
-
-    <h3>WebSocket & Socket.io Complete Guide</h3>
-    <p><strong>Endpoint:</strong> <code>GET /help/sockets</code></p>
-    <p><strong>Description:</strong> Comprehensive educational resource about WebSockets, Socket.io, and their integration with RxJS for teaching purposes.</p>
-    <p><strong>Topics Covered:</strong></p>
-    <ul>
-        <li>What are WebSockets and why use them</li>
-        <li>WebSocket vs HTTP polling vs long-polling</li>
-        <li>Socket.io features and architecture</li>
-        <li>RxJS integration patterns</li>
-        <li>Implementation details of this project</li>
-        <li>Angular integration guide</li>
-        <li>Best practices for performance, security, reliability</li>
-        <li>Debugging tips and common issues</li>
-        <li>Available endpoints and socket events</li>
-    </ul>
-    <pre><code>curl http://localhost:3001/help/sockets</code></pre>
-
-    <hr>
-
-    <h2 id="data-models">📊 Data Models</h2>
-
-    <h3>Book Object (API Response)</h3>
-    <p>The server returns books in this format:</p>
-    <pre><code>{
-  "userId": number,     // Author ID (1-5)
-  "id": number,         // Unique book identifier
-  "title": string,      // Book title
-  "body": string        // Book description
+      <span class="field-label" style="margin-top:1rem">User</span>
+      <pre><code>{
+  id, username, email, fullName, role ("user" | "librarian"),
+  phone?, address?, maxBooksAllowed, currentBooksCount,
+  totalFines, paidFines, isActive, joinDate
 }</code></pre>
 
-    <h3>Angular Book Model (After Transformation)</h3>
-    <p>In your Angular application, transform the API response to this format:</p>
-    <pre><code>{
-  "id": number,
-  "title": string,
-  "author": string,              // Transform userId to "Author 1", etc.
-  "description": string,         // Map from body field
-  "status": "available" | "reading" | "read"
+      <span class="field-label" style="margin-top:1rem">Issue (Borrowing Record)</span>
+      <pre><code>{
+  id, bookId, userId,
+  issueDate, dueDate, returnDate (string | null),
+  status ("issued" | "overdue" | "returned"),
+  renewalCount, maxRenewals,
+  fineAmount, finePaid,
+  issuedBy, returnedTo (string | null),
+  notes
 }</code></pre>
 
-    <h3>Login Request</h3>
-    <pre><code>{
-  "username": string,
-  "password": string
+      <span class="field-label" style="margin-top:1rem">Fine Configuration</span>
+      <pre><code>{
+  "library": { "maxBooksPerUser": 3, "issueDurationDays": 14, "maxRenewals": 2, "renewalExtensionDays": 7 },
+  "fines":   { "enabled": true, "perDayRate": 0.50, "maxFinePerBook": 20.00, "gracePeriodDays": 1 }
 }</code></pre>
+    </section>
 
-    <h3>Login Response</h3>
-    <pre><code>{
-  "message": string,
-  "token": string,      // JWT token
-  "user": {
-    "username": string
-  }
-}</code></pre>
+    <!-- ══ ERROR CODES ══ -->
+    <section class="section" id="error-codes">
+      <h2 class="section-title">Error Codes</h2>
 
-    <hr>
+      <p style="font-size:0.83rem;margin-bottom:1rem">All errors return <code>{ "error": "message" }</code>.</p>
 
-    <h2 id="error-codes">⚠️ Error Codes</h2>
+      <div class="quick-ref">
+        <table>
+          <thead><tr><th>Code</th><th>Meaning</th><th>Common Cause</th></tr></thead>
+          <tbody>
+            <tr><td class="status-200">200</td><td>OK</td><td>Request succeeded</td></tr>
+            <tr><td class="status-201">201</td><td>Created</td><td>Resource successfully created</td></tr>
+            <tr><td class="status-400">400</td><td>Bad Request</td><td>Missing required fields or validation failed</td></tr>
+            <tr><td class="status-401">401</td><td>Unauthorized</td><td>No token provided</td></tr>
+            <tr><td class="status-403">403</td><td>Forbidden</td><td>Invalid/expired token, or insufficient role</td></tr>
+            <tr><td class="status-404">404</td><td>Not Found</td><td>Resource does not exist</td></tr>
+            <tr><td class="status-500">500</td><td>Internal Server Error</td><td>Unexpected server error</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Status Code</th>
-                <th>Meaning</th>
-                <th>Common Causes</th>
-            </tr>
-        </thead>
+    <!-- ══ QUICK START ══ -->
+    <section class="section" id="quick-start">
+      <h2 class="section-title">Quick Start</h2>
+
+      <span class="field-label">Install &amp; Run</span>
+      <pre><code>npm install
+npm start          # production mode
+npm run dev        # development mode with auto-reload</code></pre>
+
+      <span class="field-label" style="margin-top:1rem">Configuration</span>
+      <table>
+        <thead><tr><th>Setting</th><th>Default</th><th>Notes</th></tr></thead>
         <tbody>
-            <tr>
-                <td><strong>200</strong></td>
-                <td>OK</td>
-                <td>Request succeeded</td>
-            </tr>
-            <tr>
-                <td><strong>201</strong></td>
-                <td>Created</td>
-                <td>Resource created successfully</td>
-            </tr>
-            <tr>
-                <td><strong>400</strong></td>
-                <td>Bad Request</td>
-                <td>Missing required fields or invalid data format</td>
-            </tr>
-            <tr>
-                <td><strong>401</strong></td>
-                <td>Unauthorized</td>
-                <td>No authentication token provided</td>
-            </tr>
-            <tr>
-                <td><strong>403</strong></td>
-                <td>Forbidden</td>
-                <td>Invalid or expired authentication token</td>
-            </tr>
-            <tr>
-                <td><strong>404</strong></td>
-                <td>Not Found</td>
-                <td>Book or endpoint does not exist</td>
-            </tr>
-            <tr>
-                <td><strong>500</strong></td>
-                <td>Internal Server Error</td>
-                <td>Server encountered an unexpected error</td>
-            </tr>
+          <tr><td>Port</td><td>3001</td><td>Configurable in server.js</td></tr>
+          <tr><td>CORS</td><td>All origins</td><td>Allows Angular dev server on :4200</td></tr>
+          <tr><td>Network delay</td><td>500ms</td><td>Simulated latency on all endpoints</td></tr>
+          <tr><td>Storage</td><td>In-memory</td><td>All data resets on server restart</td></tr>
+          <tr><td>JWT secret</td><td>Configurable</td><td>Set in server.js</td></tr>
         </tbody>
-    </table>
+      </table>
 
-    <h3>Error Response Format</h3>
-    <p>All errors follow this format:</p>
-    <pre><code>{
-  "error": "Error message description"
-}</code></pre>
-
-    <hr>
-
-    <h2 id="examples">💡 Usage Examples</h2>
-
-    <h3>Complete Workflow Example</h3>
-
-    <h4>Step 1: View Public Books</h4>
-    <pre><code>curl http://localhost:3001/books</code></pre>
-
-    <h4>Step 2: Login</h4>
-    <pre><code>curl -X POST http://localhost:3001/auth/login \
+      <span class="field-label" style="margin-top:1rem">V2 Full Workflow (Library Manager)</span>
+      <pre><code># 1. Login
+curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "testuser", "password": "testpass"}'
+  -d '{"username":"user1","password":"user123"}'
 
-# Response:
-# {
-#   "message": "Login successful",
-#   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-#   "user": {"username": "testuser"}
-# }</code></pre>
+# 2. Save token from response, then get your issues:
+curl http://localhost:3001/api/issues \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
 
-    <h4>Step 3: Save Token</h4>
-    <pre><code># Set the token from the login response
-TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</code></pre>
-
-    <h4>Step 4: Create a Book (Protected)</h4>
-    <pre><code>curl -X POST http://localhost:3001/books \
-  -H "Authorization: Bearer $TOKEN" \
+# 3. Borrow a book
+curl -X POST http://localhost:3001/api/issues \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
-  -d '{
-    "title": "Angular Best Practices",
-    "body": "A comprehensive guide to Angular development",
-    "userId": 1
-  }'
+  -d '{"bookId": 1}'</code></pre>
 
-# Response:
-# {
-#   "userId": 1,
-#   "id": 11,
-#   "title": "Angular Best Practices",
-#   "body": "A comprehensive guide to Angular development"
-# }</code></pre>
-
-    <h4>Step 5: Update the Book</h4>
-    <pre><code>curl -X PUT http://localhost:3001/books/11 \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Advanced Angular Best Practices",
-    "body": "An updated comprehensive guide",
-    "userId": 1
-  }'</code></pre>
-
-    <h4>Step 6: Delete the Book</h4>
-    <pre><code>curl -X DELETE http://localhost:3001/books/11 \
-  -H "Authorization: Bearer $TOKEN"</code></pre>
-
-    <h4>Step 7: Logout</h4>
-    <pre><code>curl -X POST http://localhost:3001/auth/logout \
-  -H "Authorization: Bearer $TOKEN"</code></pre>
-
-    <hr>
-
-    <h3>Angular HttpClient Sample code to get you started</h3>
-
-    <h4>AuthService Implementation</h4>
-    <pre><code>import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthService {
-  private apiUrl = 'http://localhost:3001/auth';
-  private tokenKey = 'auth_token';
-
-  constructor(private http: HttpClient) {}
-
-  login(username: string, password: string): Observable&lt;any&gt; {
-    return this.http.post&lt;any&gt;(`${this.apiUrl}/login`, { username, password }).pipe(
-      tap(response =&gt; {
-        if (response.token) {
-          localStorage.setItem(this.tokenKey, response.token);
-        }
-      })
-    );
-  }
-
-  logout(): Observable&lt;any&gt; {
-    return this.http.post(`${this.apiUrl}/logout`, {}).pipe(
-      tap(() =&gt; {
-        localStorage.removeItem(this.tokenKey);
-      })
-    );
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
-  }
-
-  isLoggedIn(): boolean {
-    return !!this.getToken();
-  }
-}</code></pre>
-
-    <hr>
-
-    <h2>🚀 Quick Start</h2>
-
-    <h3>Installation</h3>
-    <pre><code>npm install</code></pre>
-
-    <h3>Run Server</h3>
-    <pre><code># Standard mode
-npm start
-
-# Development mode with auto-reload
-npm run dev</code></pre>
-
-    <h3>Configuration</h3>
-    <ul>
-        <li><strong>Port:</strong> 3001 (configurable in server.js)</li>
-        <li><strong>CORS:</strong> Enabled for all origins</li>
-        <li><strong>JWT Secret:</strong> Configurable in server.js</li>
-        <li><strong>Network Delay:</strong> 500ms simulation (configurable)</li>
-    </ul>
-
-    <hr>
-
-    <h2>📝 Notes</h2>
-
-    <ul>
-        <li><strong>Mock Authentication:</strong> The server accepts ANY username/password combination for testing purposes.</li>
-        <li><strong>In-Memory Storage:</strong> All data is stored in memory and resets when the server restarts.</li>
-        <li><strong>CORS Enabled:</strong> The server has CORS enabled to allow requests from Angular dev server (http://localhost:4200).</li>
-        <li><strong>Request Logging:</strong> All requests are logged to the console with headers for debugging.</li>
-        <li><strong>Token Storage:</strong> Tokens are tracked server-side for logout functionality.</li>
-        <li><strong>Network Delay:</strong> All endpoints simulate a 500ms network delay for realistic testing.</li>
-    </ul>
-
-    <hr>
-
-    <h2>🔗 Additional Resources</h2>
-
-    <ul>
-        <li><a href="https://angular.io/guide/http">Angular HttpClient Guide</a></li>
-        <li><a href="https://rxjs.dev/guide/operators">RxJS Operators</a></li>
-        <li><a href="https://jwt.io/">JWT.io - Token Debugger</a></li>
-        <li><a href="https://expressjs.com/">Express.js Documentation</a></li>
-    </ul>
-
-    <hr>
-
-    <p><em>Generated: February 10, 2026</em></p>
-    <p><em>Version: 2.0.0 - Added RxJS Teaching WebSocket Streams</em></p>
-
-</body>
-</html>
+      <span class="field-label" style="margin-top:1rem">Legacy Workflow (Earlier Boo

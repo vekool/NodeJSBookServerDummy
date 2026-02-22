@@ -1,0 +1,30 @@
+{
+  "library": {
+    "name": "City Central Library",
+    "maxBooksPerUser": 3,
+    "issueDurationDays": 14,
+    "maxRenewals": 2,
+    "renewalExtensionDays": 7
+  },
+  "fines": {
+    "enabled": true,
+    "perDayRate": 0.5,
+    "maxFinePerBook": 20,
+    "gracePeriodDays": 1
+  },
+  "roles": {
+    "user": {
+      "permissions": [
+        "view_books",
+        "borrow_books",
+        "view_own_history",
+        "pay_fines"
+      ]
+    },
+    "librarian": {
+      "permissions": [
+        "*"
+      ]
+    }
+  }
+}

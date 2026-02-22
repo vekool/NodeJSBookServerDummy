@@ -1,0 +1,73 @@
+{
+  "users": [
+    {
+      "id": 100,
+      "username": "admin",
+      "email": "admin@library.com",
+      "password": "$2a$10$RaGSKcsM3dNrKgWcsp6w.u0L2Tj0hF.JnbnwQnbxSryDK58jOB3UG",
+      "fullName": "Library Administrator",
+      "role": "librarian",
+      "phone": "+1-555-0100",
+      "address": "123 Library Street, Book City",
+      "joinDate": "2026-02-14T03:32:02.067Z",
+      "isActive": true,
+      "maxBooksAllowed": 10,
+      "currentBooksCount": 0,
+      "totalFines": 0,
+      "paidFines": 0,
+      "membershipExpiry": "2027-12-31T00:00:00.000Z"
+    },
+    {
+      "id": 101,
+      "username": "user1",
+      "email": "user1@example.com",
+      "password": "$2a$10$TOjLZFNSON9inoZAD3KcZOUJdMEsQmiQkaifWhfd07bHKfYic1ZYK",
+      "fullName": "John Smith",
+      "role": "user",
+      "phone": "+1-555-0101",
+      "address": "456 Reader Lane, Book City",
+      "joinDate": "2026-02-14T03:32:02.067Z",
+      "isActive": true,
+      "maxBooksAllowed": 3,
+      "currentBooksCount": 0,
+      "totalFines": 0,
+      "paidFines": 0,
+      "membershipExpiry": "2027-12-31T00:00:00.000Z"
+    },
+    {
+      "id": 102,
+      "username": "user2",
+      "email": "user2@example.com",
+      "password": "$2a$10$TOjLZFNSON9inoZAD3KcZOUJdMEsQmiQkaifWhfd07bHKfYic1ZYK",
+      "fullName": "Jane Doe",
+      "role": "user",
+      "phone": "+1-555-0102",
+      "address": "789 Novel Avenue, Book City",
+      "joinDate": "2026-02-14T03:32:02.067Z",
+      "isActive": true,
+      "maxBooksAllowed": 3,
+      "currentBooksCount": 0,
+      "totalFines": 0,
+      "paidFines": 0,
+      "membershipExpiry": "2027-12-31T00:00:00.000Z"
+    },
+    {
+      "id": 103,
+      "username": "user3",
+      "email": "user3@example.com",
+      "password": "$2a$10$TOjLZFNSON9inoZAD3KcZOUJdMEsQmiQkaifWhfd07bHKfYic1ZYK",
+      "fullName": "Bob Johnson",
+      "role": "user",
+      "phone": "+1-555-0103",
+      "address": "321 Story Boulevard, Book City",
+      "joinDate": "2026-02-14T03:32:02.067Z",
+      "isActive": true,
+      "maxBooksAllowed": 3,
+      "currentBooksCount": 0,
+      "totalFines": 0,
+      "paidFines": 0,
+      "membershipExpiry": "2027-12-31T00:00:00.000Z"
+    }
+  ],
+  "nextId": 104
+}

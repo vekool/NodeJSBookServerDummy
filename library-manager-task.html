@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Angular Library Manager — Student Task Brief</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0f0e0d;
+      --paper:     #f5f0e8;
+      --paper-alt: #ede7d9;
+      --rule:      #c8bfab;
+      --accent:    #c0392b;
+      --accent2:   #1a5276;
+      --stamp:     #7d6608;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'IBM Plex Sans', sans-serif;
+      --serif:     'Playfair Display', Georgia, serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.7;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 27px,
+          rgba(180,160,120,0.08) 28px
+        );
+    }
+
+    /* ── PAGE WRAPPER ── */
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem 6rem;
+    }
+
+    /* ── MASTHEAD ── */
+    .masthead {
+      border-top: 5px solid var(--ink);
+      border-bottom: 2px solid var(--ink);
+      padding: 2rem 0 1.5rem;
+      margin-bottom: 3rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 1rem;
+    }
+    .masthead-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    .masthead h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+    }
+    .masthead-meta {
+      text-align: right;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      line-height: 2;
+      color: #5a5040;
+    }
+    .masthead-meta strong {
+      color: var(--ink);
+    }
+
+    /* ── OVERVIEW BAND ── */
+    .overview {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 1.8rem 2rem;
+      margin-bottom: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .overview-item label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--rule);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    .overview-item span {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* ── SECTION HEADERS ── */
+    .section {
+      margin-bottom: 3.5rem;
+    }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      border-bottom: 1.5px solid var(--ink);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section-number {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── PROSE ── */
+    p {
+      margin-bottom: 1rem;
+      font-weight: 300;
+      max-width: 72ch;
+    }
+    p strong { font-weight: 600; }
+
+    /* ── FOLDER TREE ── */
+    .tree {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.9;
+      background: var(--paper-alt);
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--accent2);
+      padding: 1.4rem 1.6rem;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .tree .dir  { color: var(--accent2); font-weight: 600; }
+    .tree .file { color: var(--ink); }
+    .tree .note { color: #888; font-style: italic; }
+
+    /* ── TASK CARDS (modules) ── */
+    .module-grid {
+      display: grid;
+      gap: 1.4rem;
+    }
+
+    .module-card {
+      border: 1px solid var(--rule);
+      background: #fdfaf4;
+      position: relative;
+      overflow: hidden;
+    }
+    .module-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+    }
+    .module-card.color-1::before { background: var(--accent); }
+    .module-card.color-2::before { background: var(--accent2); }
+    .module-card.color-3::before { background: #1e8449; }
+    .module-card.color-4::before { background: var(--stamp); }
+    .module-card.color-5::before { background: #6c3483; }
+    .module-card.color-6::before { background: #117a65; }
+    .module-card.color-7::before { background: #784212; }
+
+    .module-card-head {
+      display: flex;
+      align-items: baseline;
+      gap: 0.8rem;
+      padding: 1rem 1.2rem 0.6rem 1.4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .module-badge {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #888;
+      flex-shrink: 0;
+    }
+    .module-title {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .module-syllabus {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: #aaa;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .module-body {
+      padding: 0.9rem 1.2rem 1rem 1.4rem;
+    }
+    .module-body p {
+      font-size: 0.88rem;
+      margin-bottom: 0.6rem;
+      max-width: none;
+    }
+
+    .task-list {
+      list-style: none;
+      margin-top: 0.8rem;
+    }
+    .task-list li {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      font-weight: 300;
+      padding: 0.3rem 0 0.3rem 1.4rem;
+      border-bottom: 1px dashed var(--rule);
+      position: relative;
+    }
+    .task-list li:last-child { border-bottom: none; }
+    .task-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 400;
+    }
+    .task-list li strong { font-weight: 600; }
+    .task-list li em {
+      font-family: var(--mono);
+      font-style: normal;
+      font-size: 0.78rem;
+      color: var(--accent2);
+      background: rgba(26,82,118,0.07);
+      padding: 0 0.3em;
+      border-radius: 2px;
+    }
+
+    /* ── REQUIREMENT PILLS ── */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.8rem;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      padding: 0.2em 0.6em;
+      border: 1px solid currentColor;
+      border-radius: 2px;
+    }
+    .tag.component  { color: var(--accent2); }
+    .tag.service    { color: #1e8449; }
+    .tag.pipe       { color: var(--stamp); }
+    .tag.directive  { color: #6c3483; }
+    .tag.guard      { color: var(--accent); }
+    .tag.interceptor{ color: #117a65; }
+    .tag.form       { color: #784212; }
+    .tag.route      { color: #1e8449; }
+
+    /* ── API QUICK REF ── */
+    .api-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 0.8rem;
+    }
+    .api-table th {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 0.5rem 0.8rem;
+      background: var(--ink);
+      color: var(--paper);
+      font-weight: 400;
+    }
+    .api-table td {
+      padding: 0.55rem 0.8rem;
+      border-bottom: 1px solid var(--rule);
+      vertical-align: top;
+    }
+    .api-table tr:nth-child(even) td {
+      background: var(--paper-alt);
+    }
+    .method {
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.72rem;
+      padding: 0.15em 0.4em;
+      border-radius: 2px;
+    }
+    .get    { background: #d5f5e3; color: #1e8449; }
+    .post   { background: #d6eaf8; color: #1a5276; }
+    .put    { background: #fdebd0; color: #784212; }
+    .delete { background: #fadbd8; color: var(--accent); }
+    .endpoint { font-family: var(--mono); font-size: 0.78rem; color: var(--accent2); }
+
+    /* ── CALLOUT BOXES ── */
+    .callout {
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      border-left: 3px solid;
+      font-size: 0.88rem;
+    }
+    .callout.info    { border-color: var(--accent2); background: rgba(26,82,118,0.05); }
+    .callout.warn    { border-color: var(--stamp);   background: rgba(125,102,8,0.05); }
+    .callout.rule    { border-color: var(--accent);  background: rgba(192,57,43,0.05); }
+    .callout-title {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    .callout.info  .callout-title { color: var(--accent2); }
+    .callout.warn  .callout-title { color: var(--stamp); }
+    .callout.rule  .callout-title { color: var(--accent); }
+    .callout p { margin: 0; max-width: none; }
+
+    /* ── CREDENTIAL BOX ── */
+    .creds {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.8rem;
+    }
+    .cred-card {
+      background: var(--paper-alt);
+      border: 1px solid var(--rule);
+      padding: 0.9rem 1rem;
+    }
+    .cred-card h4 {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 0.5rem;
+    }
+    .cred-line {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      display: flex;
+      gap: 0.8rem;
+    }
+    .cred-line span:first-child { color: #888; width: 4rem; flex-shrink: 0; }
+
+    /* ── MARKING RUBRIC ── */
+    .rubric {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+    .rubric th {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 0.5rem 0.8rem;
+      text-align: left;
+      font-weight: 400;
+    }
+    .rubric td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--rule);
+      vertical-align: top;
+    }
+    .rubric tr:nth-child(even) td { background: var(--paper-alt); }
+    .marks {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--accent2);
+      white-space: nowrap;
+    }
+    .bonus { color: #1e8449; font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+
+    /* ── FOOTER ── */
+    .doc-footer {
+      margin-top: 5rem;
+      border-top: 2px solid var(--ink);
+      padding-top: 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: #888;
+    }
+
+    /* ── CODE FILE BLOCKS ── */
+    .code-file {
+      margin-bottom: 1.2rem;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .code-file-header {
+      background: var(--ink);
+      padding: 0.45rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .code-file-header::before {
+      content: '◆';
+      color: var(--accent);
+      font-size: 0.55rem;
+    }
+    .code-file-name {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: #c8d0d8;
+      letter-spacing: 0.04em;
+    }
+    .code-block {
+      margin: 0;
+      padding: 1.1rem 1.3rem;
+      background: #1a1915;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.8;
+    }
+    .code-block code {
+      font-family: inherit;
+      color: #d4cfc7;
+    }
+    .code-block .kw  { color: #7fb3d3; }   /* keywords & types */
+    .code-block .type { color: #a9d18e; }  /* interface names */
+    .code-block .str  { color: #f0b37e; }  /* string literals */
+    .code-block .cm   { color: #5a6570; font-style: italic; } /* comments */
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: white; font-size: 11pt; }
+      .overview { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page { padding: 1.5cm; }
+    }
+
+    @media (max-width: 600px) {
+      .masthead { grid-template-columns: 1fr; }
+      .masthead-meta { text-align: left; }
+      .overview { grid-template-columns: 1fr; gap: 0.8rem; }
+      .creds { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ MASTHEAD ══ -->
+  <header class="masthead">
+    <div>
+      <span class="masthead-label">Angular Capstone Project — All Modules</span>
+      <h1>Library<br>Manager</h1>
+    </div>
+    <div class="masthead-meta">
+      <strong>Framework</strong> Angular 17+ (Standalone)<br>
+      <strong>API Base</strong> http://localhost:3001<br>
+      <strong>Modules</strong> 2 – 14<br>
+      <strong>Type</strong> Individual / Pair
+    </div>
+  </header>
+
+  <!-- ══ OVERVIEW BAND ══ -->
+  <div class="overview">
+    <div class="overview-item">
+      <label>What you're building</label>
+      <span>A full-stack-connected library app where users browse, borrow, and return books — and librarians manage the whole system.</span>
+    </div>
+    <div class="overview-item">
+      <label>What it covers</label>
+      <span>Components · Templates · Directives · Services · Pipes · Forms · Routing · HTTP · Auth · Interceptors · Lazy Loading</span>
+    </div>
+    <div class="overview-item">
+      <label>What you must NOT do</label>
+      <span>Do not copy code from the internet or use AI to write your implementation. The goal is to practise every concept yourself.</span>
+    </div>
+  </div>
+
+  <!-- ══ 1. PROJECT OVERVIEW ══ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <h2 class="section-title">Project Description</h2>
+    </div>
+    <p>You will build a <strong>Library Management System</strong> that connects to a provided Node/Express backend. The app has two user roles: a <strong>regular user</strong> who can browse the catalogue, borrow books, track their loans, and pay fines; and a <strong>librarian</strong> who can add/edit books, manage all users, and view dashboard statistics.</p>
+    <p>Every Angular concept taught across the course maps onto a real, visible feature in this app. You are given the <em>folder structure</em>, the <em>names</em> of every piece you must create, and the <em>behaviour</em> it needs to implement — but <strong>no code</strong>. Build it yourself.</p>
+
+    <div class="callout info">
+      <span class="callout-title">API Server</span>
+      <p>Start the provided backend with <code>npm start</code> in the server folder. It runs on <strong>http://localhost:3001</strong>. All data resets on restart — that's fine. Use the <em>Student Quick Reference</em> section of the API docs to understand the workflow.</p>
+    </div>
+  </section>
+
+  <!-- ══ 2. FOLDER STRUCTURE ══ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <h2 class="section-title">Folder Structure</h2>
+    </div>
+    <p>Create the project with <code>ng new library-manager</code> — modern Angular defaults to standalone with no AppModule. Then build out the structure below. Every folder and file listed here must exist in your submission.</p>
+
+    <div class="tree"><span class="dir">src/
+└── app/
+    ├── auth/</span>                                <span class="note">← login, register + auth service + guards</span>
+<span class="dir">    │   ├── login/
+    │   │   ├── login.component.ts</span>
+<span class="dir">    │   │   └── login.component.html</span>
+<span class="dir">    │   ├── register/
+    │   │   ├── register.component.ts</span>
+<span class="dir">    │   │   └── register.component.html</span>
+<span class="dir">    │   ├── guards/
+    │   │   ├── auth.guard.ts</span>                <span class="note">blocks unauthenticated access</span>
+<span class="dir">    │   │   └── librarian.guard.ts</span>           <span class="note">blocks non-librarian role</span>
+<span class="dir">    │   ├── interceptors/
+    │   │   ├── auth.interceptor.ts</span>          <span class="note">attaches JWT to every request</span>
+<span class="dir">    │   │   └── error.interceptor.ts</span>         <span class="note">handles 401/403/500 globally</span>
+<span class="dir">    │   ├── auth.service.ts</span>                  <span class="note">login, logout, token, currentUser$</span>
+<span class="dir">    │   └── auth.routes.ts</span>                   <span class="note">{ path: 'login', ... }, { path: 'register', ... }</span>
+<span class="dir">    │
+    ├── books/</span>                               <span class="note">← browse catalogue + borrow</span>
+<span class="dir">    │   ├── book-list/
+    │   │   ├── book-list.component.ts</span>
+<span class="dir">    │   │   └── book-list.component.html</span>
+<span class="dir">    │   ├── book-detail/
+    │   │   ├── book-detail.component.ts</span>
+<span class="dir">    │   │   └── book-detail.component.html</span>
+<span class="dir">    │   ├── book-card/
+    │   │   ├── book-card.component.ts</span>       <span class="note">reusable card — used by book-list and librarian</span>
+<span class="dir">    │   │   └── book-card.component.html</span>
+<span class="dir">    │   ├── book.service.ts</span>                  <span class="note">HTTP calls for books</span>
+<span class="dir">    │   └── books.routes.ts</span>                  <span class="note">{ path: 'books', ... }, { path: 'books/:id', ... }</span>
+<span class="dir">    │
+    ├── my-books/</span>                            <span class="note">← current loans + fines for logged-in user</span>
+<span class="dir">    │   ├── my-books.component.ts</span>
+<span class="dir">    │   ├── my-books.component.html</span>
+<span class="dir">    │   ├── issue.service.ts</span>                 <span class="note">borrow / return / renew</span>
+<span class="dir">    │   └── fine.service.ts</span>                  <span class="note">get fines / pay fine</span>
+<span class="dir">    │
+    ├── librarian/</span>                           <span class="note">← librarian-only views (guarded)</span>
+<span class="dir">    │   ├── dashboard/
+    │   │   └── dashboard.component.ts</span>
+<span class="dir">    │   ├── manage-books/
+    │   │   ├── book-form.component.ts</span>       <span class="note">reactive form — create &amp; edit</span>
+<span class="dir">    │   │   └── book-list-admin.component.ts</span>
+<span class="dir">    │   ├── manage-users/
+    │   │   └── user-list.component.ts</span>
+<span class="dir">    │   └── librarian.routes.ts</span>              <span class="note">child routes — all protected by librarian.guard</span>
+<span class="dir">    │
+    ├── shared/</span>                              <span class="note">← small UI pieces used across multiple features</span>
+<span class="dir">    │   ├── loading-spinner.component.ts</span>
+<span class="dir">    │   ├── confirm-dialog.component.ts</span>
+<span class="dir">    │   ├── highlight.directive.ts</span>           <span class="note">hover highlight via @HostListener / @HostBinding</span>
+<span class="dir">    │   ├── role.directive.ts</span>                <span class="note">structural — show/hide by user role</span>
+<span class="dir">    │   ├── days-until.pipe.ts</span>               <span class="note">ISO date → "3 days left"</span>
+<span class="dir">    │   ├── overdue-status.pipe.ts</span>           <span class="note">issue → 'active' | 'overdue' | 'returned'</span>
+<span class="dir">    │   └── truncate.pipe.ts</span>                 <span class="note">truncates long descriptions</span>
+<span class="dir">    │
+    ├── models/</span>                              <span class="note">← TypeScript interfaces only, no logic</span>
+<span class="dir">    │   ├── book.model.ts</span>
+<span class="dir">    │   ├── user.model.ts</span>
+<span class="dir">    │   ├── issue.model.ts</span>
+<span class="dir">    │   └── fine.model.ts</span>
+<span class="dir">    │
+    ├── app.component.ts</span>                     <span class="note">imports RouterOutlet + navbar — nothing else</span>
+<span class="dir">    ├── app.component.html</span>                   <span class="note">navbar + &lt;router-outlet&gt;</span>
+<span class="dir">    ├── app.config.ts</span>                        <span class="note">provideRouter(routes), provideHttpClient(withInterceptors([...]))</span>
+<span class="dir">    └── app.routes.ts</span>                        <span class="note">loadChildren → each feature's *.routes.ts</span></div>
+  </section>
+
+  <!-- ══ 3. REQUIRED PIECES ══ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <h2 class="section-title">What to Build — Module by Module</h2>
+    </div>
+    <p>Each card below tells you what to create and what it must do. The syllabus reference next to each card tells you which course module the concept belongs to.</p>
+
+    <div class="module-grid">
+
+      <!-- CARD: Components & Templates -->
+      <div class="module-card color-1">
+        <div class="module-card-head">
+          <span class="module-badge">Card A</span>
+          <span class="module-title">Components &amp; Templates</span>
+          <span class="module-syllabus">Syllabus Mod 2–3</span>
+        </div>
+        <div class="module-body">
+          <p>Every component listed in the folder structure must be created as a standalone component using the <code>@Component</code> decorator with <code>standalone: true</code>.</p>
+          <ul class="task-list">
+            <li><strong>app.component</strong> — Root shell. Contains the <em>&lt;router-outlet&gt;</em> and a navigation bar. The navbar shows different links depending on whether the user is logged in and whether they are a librarian. Use <em>property binding</em> and <em>string interpolation</em> to display the logged-in user's name.</li>
+            <li><strong>book-card.component</strong> — Accepts a <em>@Input() book</em> object and emits a <em>@Output() borrowClicked</em> event. Displays title, author, category, and available copies. Uses <em>class binding</em> to visually indicate when a book has zero available copies.</li>
+            <li><strong>loading-spinner.component</strong> — Accepts an <em>@Input() isLoading: boolean</em>. Conditionally rendered in parent templates while HTTP calls are in progress. No external library — implement with pure CSS animation.</li>
+            <li><strong>confirm-dialog.component</strong> — Accepts a <em>@Input() message</em> string and emits <em>@Output() confirmed</em> and <em>@Output() cancelled</em>. Used before borrow/return/pay fine actions.</li>
+            <li>All templates must use the <em>safe navigation operator (?.) </em> wherever a property could be null (e.g. <code>user?.fullName</code>).</li>
+          </ul>
+          <div class="tags">
+            <span class="tag component">@Component</span>
+            <span class="tag component">@Input / @Output</span>
+            <span class="tag component">lifecycle hooks</span>
+            <span class="tag component">ngOnInit · ngOnDestroy</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: Directives -->
+      <div class="module-card color-5">
+        <div class="module-card-head">
+          <span class="module-badge">Card B</span>
+          <span class="module-title">Directives</span>
+          <span class="module-syllabus">Syllabus Mod 4</span>
+        </div>
+        <div class="module-body">
+          <p>You must use built-in structural and attribute directives throughout your templates, and implement the two custom directives below.</p>
+          <ul class="task-list">
+            <li>Use <em>*ngIf</em> (or <em>@if</em>) to show/hide the "Borrow" button depending on book availability and whether the user is already borrowing that book.</li>
+            <li>Use <em>*ngFor</em> (or <em>@for</em>) with <em>trackBy</em> on every list of books, issues, or users.</li>
+            <li>Use <em>ngClass</em> on issue rows to apply different styles for active, overdue, and returned statuses.</li>
+            <li><strong>highlight.directive</strong> — Custom attribute directive. Apply to book-card elements. On <em>mouseenter</em> it sets a background highlight via <em>@HostListener</em> and <em>@HostBinding</em>. On <em>mouseleave</em> it removes it. Accept a <em>@Input()</em> colour parameter so the caller can control the highlight colour.</li>
+            <li><strong>role.directive</strong> — Custom structural directive. Works like <em>*ngIf</em> but takes a role string (<code>'librarian'</code> or <code>'user'</code>). Shows the host element only if the current user's role matches. Use <em>ViewContainerRef</em> and <em>TemplateRef</em> internally.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag directive">*ngIf / @if</span>
+            <span class="tag directive">*ngFor / @for</span>
+            <span class="tag directive">ngClass · ngStyle</span>
+            <span class="tag directive">@Directive</span>
+            <span class="tag directive">@HostListener</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: Services & DI -->
+      <div class="module-card color-3">
+        <div class="module-card-head">
+          <span class="module-badge">Card C</span>
+          <span class="module-title">Services &amp; Dependency Injection</span>
+          <span class="module-syllabus">Syllabus Mod 6</span>
+        </div>
+        <div class="module-body">
+          <p>All business logic and state must live in services, not in components. Every service must be decorated with <code>@Injectable({ providedIn: 'root' })</code>.</p>
+          <ul class="task-list">
+            <li><strong>auth.service</strong> — Manages login, register, and logout. Stores the JWT in <em>localStorage</em>. Exposes a <em>BehaviorSubject&lt;User | null&gt;</em> called <em>currentUser$</em> that components can subscribe to. Must have helper methods <em>isLoggedIn()</em> and <em>isLibrarian()</em>. On app startup (<em>ngOnInit</em> of AppComponent) it should read a stored token and restore the user session if valid.</li>
+            <li><strong>book.service</strong> — Wraps all HTTP calls for books. Must use <em>HttpClient</em> and return <em>Observable</em> from every method. Methods: <em>getAll()</em>, <em>getById(id)</em>, <em>search(query, category)</em>, <em>create(book)</em>, <em>update(id, book)</em>, <em>delete(id)</em>.</li>
+            <li><strong>issue.service</strong> — Methods: <em>getMyIssues()</em>, <em>borrowBook(bookId)</em>, <em>returnBook(issueId)</em>, <em>renewBook(issueId)</em>.</li>
+            <li><strong>fine.service</strong> — Methods: <em>getMyFines()</em>, <em>payFine(issueId)</em>.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag service">@Injectable</span>
+            <span class="tag service">BehaviorSubject</span>
+            <span class="tag service">providedIn: 'root'</span>
+            <span class="tag service">singleton</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: Pipes -->
+      <div class="module-card color-4">
+        <div class="module-card-head">
+          <span class="module-badge">Card D</span>
+          <span class="module-title">Pipes &amp; Data Transformation</span>
+          <span class="module-syllabus">Syllabus Mod 7</span>
+        </div>
+        <div class="module-body">
+          <p>You must use built-in Angular pipes in your templates and implement the three custom pipes below.</p>
+          <ul class="task-list">
+            <li>Use the built-in <em>date</em> pipe to format all issue and due dates. Use the <em>currency</em> pipe for fine amounts. Use <em>titlecase</em> on book categories.</li>
+            <li><strong>days-until.pipe</strong> — Transforms an ISO date string into a human-readable string: <em>"3 days left"</em>, <em>"Due today"</em>, or <em>"1 day overdue"</em>. This is a <em>pure</em> pipe. Implement <em>PipeTransform</em>.</li>
+            <li><strong>overdue-status.pipe</strong> — Takes an Issue object and returns one of three string values: <em>'active'</em>, <em>'overdue'</em>, or <em>'returned'</em>. Used in templates alongside <em>ngClass</em> to apply status badge colours. Pure pipe.</li>
+            <li><strong>truncate.pipe</strong> — Accepts a string and an optional <em>limit</em> number parameter (default 100). Returns the string truncated to the limit with <em>"…"</em> appended if it exceeded the limit. Used in <em>book-card</em> for the book description. Pure pipe.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag pipe">@Pipe</span>
+            <span class="tag pipe">PipeTransform</span>
+            <span class="tag pipe">pure pipe</span>
+            <span class="tag pipe">date · currency · titlecase</span>
+            <span class="tag pipe">parameterised pipe</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: Component Communication -->
+      <div class="module-card color-2">
+        <div class="module-card-head">
+          <span class="module-badge">Card E</span>
+          <span class="module-title">Component Communication</span>
+          <span class="module-syllabus">Syllabus Mod 8</span>
+        </div>
+        <div class="module-body">
+          <p>Data must flow correctly between components using the appropriate mechanism for each situation.</p>
+          <ul class="task-list">
+            <li><strong>Parent → Child</strong>: <em>book-list</em> passes each <em>Book</em> object down to <em>book-card</em> via <em>@Input()</em>.</li>
+            <li><strong>Child → Parent</strong>: <em>book-card</em> emits a <em>borrowClicked</em> event via <em>@Output() + EventEmitter</em>. <em>book-list</em> handles it and calls <em>issue.service.borrowBook()</em>.</li>
+            <li><strong>Unrelated components via service</strong>: <em>auth.service</em>'s <em>currentUser$</em> <em>BehaviorSubject</em> is subscribed to in both <em>app.component</em> (to update the navbar) and <em>my-books.component</em> (to personalise the greeting). They must not talk to each other directly.</li>
+            <li><strong>ViewChild</strong>: In <em>book-list.component</em>, use <em>@ViewChild</em> to get a reference to a search <em>&lt;input&gt;</em> element and focus it programmatically when the component loads (<em>ngAfterViewInit</em>).</li>
+            <li><strong>Content projection</strong>: The <em>confirm-dialog</em> must use <em>&lt;ng-content&gt;</em> to project a custom message body passed from the parent.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag component">@Input · @Output</span>
+            <span class="tag component">EventEmitter</span>
+            <span class="tag component">BehaviorSubject</span>
+            <span class="tag component">@ViewChild</span>
+            <span class="tag component">ng-content</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: Forms -->
+      <div class="module-card color-7">
+        <div class="module-card-head">
+          <span class="module-badge">Card F</span>
+          <span class="module-title">Template-Driven &amp; Reactive Forms</span>
+          <span class="module-syllabus">Syllabus Mod 9–10</span>
+        </div>
+        <div class="module-body">
+          <p>You will use <strong>one form of each type</strong>. Both forms must show validation error messages to the user. Because this app uses standalone components, add <em>FormsModule</em> or <em>ReactiveFormsModule</em> directly to each component's own <code>imports: []</code> array — there is no AppModule to put them in.</p>
+          <ul class="task-list">
+            <li><strong>login.component — Template-Driven Form</strong>. Fields: <em>username</em> (required, minlength 3) and <em>password</em> (required, minlength 6). Use <em>[(ngModel)]</em> and <em>ngForm</em>. Show an error message under each field when it is touched and invalid. Disable the submit button when the form is invalid.</li>
+            <li><strong>register.component — Template-Driven Form</strong>. Fields: <em>username</em>, <em>password</em>, <em>email</em> (required + valid format), <em>fullName</em> (required). Same validation error display pattern as login. On submit call <em>auth.service.register()</em>.</li>
+            <li><strong>book-form.component — Reactive Form</strong> (librarian only). Fields: <em>title</em>, <em>author</em>, <em>isbn</em>, <em>publisher</em>, <em>category</em>, <em>totalCopies</em>. Use <em>FormBuilder</em> and <em>FormGroup</em>. Add <em>Validators.required</em> and <em>Validators.min(1)</em> on copies. The form must support both creating a new book and editing an existing one — it should <em>patchValue</em> when an existing book is passed in via <em>@Input()</em>.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag form">imports: [FormsModule]</span>
+            <span class="tag form">ngModel · ngForm</span>
+            <span class="tag form">imports: [ReactiveFormsModule]</span>
+            <span class="tag form">FormBuilder</span>
+            <span class="tag form">Validators</span>
+            <span class="tag form">patchValue</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: Routing -->
+      <div class="module-card color-3">
+        <div class="module-card-head">
+          <span class="module-badge">Card G</span>
+          <span class="module-title">Routing &amp; Navigation</span>
+          <span class="module-syllabus">Syllabus Mod 11</span>
+        </div>
+        <div class="module-body">
+          <p>Define all routes in <code>app.routes.ts</code>. All feature routes must be <strong>lazy-loaded</strong>. Wire the router in <code>app.config.ts</code> using <code>provideRouter(routes)</code> — not <code>RouterModule.forRoot()</code>. Import <em>RouterOutlet</em> in <em>app.component</em> and <em>RouterLink / RouterLinkActive</em> directly in whichever components use them.</p>
+          <ul class="task-list">
+            <li>Define these routes: <em>/login</em>, <em>/register</em>, <em>/books</em> (public), <em>/books/:id</em>, <em>/my-books</em> (guarded), <em>/librarian/dashboard</em> (guarded), <em>/librarian/books</em> (guarded), <em>/librarian/users</em> (guarded). Add a wildcard route that redirects to <em>/books</em>.</li>
+            <li>Use <em>loadComponent</em> for individual routes, and <em>loadChildren</em> to lazily load each feature's <em>*.routes.ts</em> file from <em>app.routes.ts</em>. For example: <em>{ path: 'books', loadChildren: () => import('./features/books/books.routes').then(m => m.BOOKS_ROUTES) }</em>.</li>
+            <li>In <em>book-detail.component</em>, read the <em>:id</em> route parameter using <em>ActivatedRoute</em> and the <em>paramMap</em> observable (not snapshot). Call <em>book.service.getById()</em> with it.</li>
+            <li>After a successful login, use the <em>Router</em> service to navigate to <em>/books</em> programmatically.</li>
+            <li>Use <em>routerLink</em> and <em>routerLinkActive</em> in the navigation bar. The active link must visually stand out.</li>
+            <li>Implement <em>CanActivateFn</em> guards (see Card H). Apply them to the appropriate routes.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag route">RouterOutlet · RouterLink</span>
+            <span class="tag route">loadComponent</span>
+            <span class="tag route">loadChildren</span>
+            <span class="tag route">*.routes.ts</span>
+            <span class="tag route">ActivatedRoute</span>
+            <span class="tag route">paramMap</span>
+            <span class="tag route">Router.navigate</span>
+            <span class="tag route">routerLink</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: HTTP & Observables -->
+      <div class="module-card color-2">
+        <div class="module-card-head">
+          <span class="module-badge">Card H</span>
+          <span class="module-title">HTTP Client &amp; Observables</span>
+          <span class="module-syllabus">Syllabus Mod 12</span>
+        </div>
+        <div class="module-body">
+          <p>All HTTP communication must go through the services you built in Card C using <em>HttpClient</em>. Components subscribe to these observables and update the UI. Register HTTP with <code>provideHttpClient(withInterceptors([...]))</code> in <code>app.config.ts</code> — do not use <em>HttpClientModule</em>.</p>
+          <ul class="task-list">
+            <li>In <em>book.service</em>, the <em>search()</em> method must accept a query string and category. Build a <em>HttpParams</em> object and pass it to the GET request — do not manually concatenate query strings.</li>
+            <li>In <em>book-list.component</em>, pipe the search <em>input</em> event through <em>debounceTime(300)</em> and <em>distinctUntilChanged()</em> before calling the service. This requires creating an observable from the input event using <em>fromEvent</em>.</li>
+            <li>In every component that subscribes to an observable, <strong>unsubscribe in <em>ngOnDestroy</em></strong> to prevent memory leaks. Use either a <em>Subject + takeUntil</em> pattern or the <em>async</em> pipe in the template.</li>
+            <li>Use the <em>async</em> pipe in at least one template (e.g. the books list) to display data from an observable without manually subscribing.</li>
+            <li>Use <em>catchError</em> and <em>retry(1)</em> operators in <em>book.service.getAll()</em> to handle transient failures gracefully.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag service">HttpClient</span>
+            <span class="tag service">HttpParams</span>
+            <span class="tag service">Observable</span>
+            <span class="tag pipe">async pipe</span>
+            <span class="tag service">debounceTime</span>
+            <span class="tag service">catchError · retry</span>
+            <span class="tag service">takeUntil</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: Auth & Interceptors -->
+      <div class="module-card color-1">
+        <div class="module-card-head">
+          <span class="module-badge">Card I</span>
+          <span class="module-title">Authentication, Guards &amp; Interceptors</span>
+          <span class="module-syllabus">Syllabus Mod 13</span>
+        </div>
+        <div class="module-body">
+          <p>Implement two interceptors and two guards. All four must be functional — they are part of the marking criteria. Register both interceptors in <code>app.config.ts</code> inside <code>provideHttpClient(withInterceptors([authInterceptor, errorInterceptor]))</code> — there is no <em>HTTP_INTERCEPTORS</em> token needed in standalone.</p>
+          <ul class="task-list">
+            <li><strong>auth.interceptor</strong> — An <em>HttpInterceptorFn</em>. On every outgoing request, reads the JWT token from <em>localStorage</em> (via <em>auth.service.getToken()</em>) and, if present, clones the request and adds the header <em>Authorization: Bearer &lt;token&gt;</em>. Do not attach the header to the login or register endpoints.</li>
+            <li><strong>error.interceptor</strong> — An <em>HttpInterceptorFn</em>. Intercepts the response stream. If the status is <em>401</em> or <em>403</em>, it must call <em>auth.service.logout()</em> and redirect the user to <em>/login</em>. If the status is <em>500</em>, it should log the error and rethrow it so the component can handle it. Use <em>catchError</em> on the response observable.</li>
+            <li><strong>auth.guard</strong> — A <em>CanActivateFn</em>. Returns <em>true</em> if the user is logged in (token present), otherwise redirects to <em>/login</em>. Apply to <em>/my-books</em> and all <em>/librarian/*</em> routes.</li>
+            <li><strong>librarian.guard</strong> — A <em>CanActivateFn</em>. Returns <em>true</em> only if the current user's role is <em>'librarian'</em>. Otherwise redirects to <em>/books</em>. Apply to all <em>/librarian/*</em> routes in addition to <em>auth.guard</em>.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag interceptor">HttpInterceptorFn</span>
+            <span class="tag interceptor">withInterceptors</span>
+            <span class="tag interceptor">cloneRequest</span>
+            <span class="tag interceptor">catchError</span>
+            <span class="tag guard">CanActivateFn</span>
+            <span class="tag guard">JWT + localStorage</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: Lazy Loading & Best Practices -->
+      <div class="module-card color-6">
+        <div class="module-card-head">
+          <span class="module-badge">Card J</span>
+          <span class="module-title">Lazy Loading &amp; Best Practices</span>
+          <span class="module-syllabus">Syllabus Mod 14</span>
+        </div>
+        <div class="module-body">
+          <p>Performance and code quality requirements. These are checked during code review, not just by running the app.</p>
+          <ul class="task-list">
+            <li><strong>Lazy loading</strong>: <em>app.routes.ts</em> uses <em>loadChildren</em> to point to each feature's <em>*.routes.ts</em> file. Inside feature route files, use <em>loadComponent</em> to load the individual components. Verify in DevTools Network tab — feature bundles must only load when the route is first visited.</li>
+            <li><strong>OnPush change detection</strong>: Apply <em>ChangeDetectionStrategy.OnPush</em> to <em>book-card.component</em> and <em>loading-spinner.component</em>. These are pure display components that should only re-render when their inputs change.</li>
+            <li><strong>TrackBy</strong>: Every <em>*ngFor</em> / <em>@for</em> loop in the app must use a <em>trackBy</em> function (or <em>track</em> expression) that tracks by the item's <em>id</em> property.</li>
+            <li><strong>No memory leaks</strong>: Use the <em>takeUntil(this.destroy$)</em> pattern with a <em>Subject</em> in every component that manually subscribes to an observable. The subject must be completed in <em>ngOnDestroy</em>.</li>
+            <li><strong>TypeScript types</strong>: No use of <em>any</em> allowed. All HTTP responses must be typed using the interfaces in <em>app/models/</em>.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag route">loadChildren</span>
+            <span class="tag route">loadComponent</span>
+            <span class="tag component">OnPush</span>
+            <span class="tag directive">trackBy / track</span>
+            <span class="tag service">takeUntil · destroy$</span>
+            <span class="tag service">TypeScript interfaces</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /module-grid -->
+  </section>
+
+  <!-- ══ 4. API QUICK REFERENCE ══ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <h2 class="section-title">API Quick Reference</h2>
+    </div>
+    <p>Base URL: <code>http://localhost:3001</code>. Use the <strong>V2 endpoints</strong> (<code>/api/…</code>) for all features. The legacy endpoints (<code>/books</code>, <code>/auth/login</code>) are kept only for backward-compatibility testing.</p>
+
+    <div class="creds">
+      <div class="cred-card">
+        <h4>Test Credentials — Librarian</h4>
+        <div class="cred-line"><span>user</span><strong>admin</strong></div>
+        <div class="cred-line"><span>pass</span><strong>admin123</strong></div>
+        <div class="cred-line"><span>role</span><strong>librarian</strong></div>
+      </div>
+      <div class="cred-card">
+        <h4>Test Credentials — Regular User</h4>
+        <div class="cred-line"><span>user</span><strong>user1</strong></div>
+        <div class="cred-line"><span>pass</span><strong>user123</strong></div>
+        <div class="cred-line"><span>role</span><strong>user</strong></div>
+      </div>
+    </div>
+
+    <table class="api-table" style="margin-top:1.4rem">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Endpoint</th>
+          <th>Auth?</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/auth/register</td><td>No</td><td>Register a new user. Returns user object.</td></tr>
+        <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/auth/login</td><td>No</td><td>Returns JWT token + full user profile.</td></tr>
+        <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/auth/profile</td><td>Yes</td><td>Get current user's profile.</td></tr>
+        <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/books</td><td>No</td><td>Get all books (full V2 model with copies, author, etc.).</td></tr>
+        <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/books/:id</td><td>No</td><td>Get single book by ID.</td></tr>
+        <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/books/search?query=&amp;category=</td><td>No</td><td>Search books by title/author and/or filter by category.</td></tr>
+        <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/books/create</td><td>Yes (Lib)</td><td>Create a new book. Requires title, author, totalCopies.</td></tr>
+        <tr><td><span class="method put">PUT</span></td><td class="endpoint">/api/books/:id</td><td>Yes (Lib)</td><td>Update an existing book.</td></tr>
+        <tr><td><span class="method delete">DELETE</span></td><td class="endpoint">/api/books/:id</td><td>Yes (Lib)</td><td>Delete a book from the catalogue.</td></tr>
+        <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/issues</td><td>Yes</td><td>Borrow a book. Body: <code>{ "bookId": 1 }</code>. Returns issue with dueDate.</td></tr>
+        <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/issues/my</td><td>Yes</td><td>Get current user's loans. Includes <code>isOverdue</code> and <code>daysUntilDue</code>.</td></tr>
+        <tr><td><span class="method put">PUT</span></td><td class="endpoint">/api/issues/:id/return</td><td>Yes</td><td>Return a book. Auto-calculates fine if overdue.</td></tr>
+        <tr><td><span class="method put">PUT</span></td><td class="endpoint">/api/issues/:id/renew</td><td>Yes</td><td>Extend due date by 14 days. Max 2 renewals per book.</td></tr>
+        <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/fines/my</td><td>Yes</td><td>Get all fines for current user (paid + unpaid).</td></tr>
+        <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/fines/:issueId/pay</td><td>Yes</td><td>Mark a fine as paid. Simulated payment — no card needed.</td></tr>
+        <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/users</td><td>Yes (Lib)</td><td>Get all users. Librarian only.</td></tr>
+        <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/stats/dashboard</td><td>Yes (Lib)</td><td>Library stats: totals, overdue count, popular books, fines.</td></tr>
+        <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/reports/overdue</td><td>Yes (Lib)</td><td>All overdue issues with user details and fine amounts.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn" style="margin-top:1.2rem">
+      <span class="callout-title">Important — Fine Rules</span>
+      <p>The grace period is <strong>1 day</strong>. After that, the rate is <strong>$0.50/day</strong>, up to a maximum of <strong>$20</strong> per book. The <em>fine</em> field on the issue object is calculated automatically by the server on return.</p>
+    </div>
+  </section>
+
+  <!-- ══ 5. DATA MODELS ══ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <h2 class="section-title">Model Interfaces — Copy These In</h2>
+    </div>
+    <p>Create the four files below inside <code>app/models/</code> and copy the code as-is. This is the boilerplate — your job is everything else. Every HTTP response in your services must be typed using these interfaces. No <code>any</code> anywhere.</p>
+
+    <!-- book.model.ts -->
+    <div class="code-file">
+      <div class="code-file-header">
+        <span class="code-file-name">app/models/book.model.ts</span>
+      </div>
+      <pre class="code-block"><code><span class="kw">export interface</span> <span class="type">Book</span> {
+  id:               <span class="kw">number</span>;
+  userId:           <span class="kw">number</span>;        <span class="cm">// legacy field — author ID</span>
+  title:            <span class="kw">string</span>;
+  body:             <span class="kw">string</span>;        <span class="cm">// book description</span>
+  author:           <span class="kw">string</span>;
+  isbn:             <span class="kw">string</span>;
+  publisher:        <span class="kw">string</span>;
+  publishedDate:    <span class="kw">string</span>;        <span class="cm">// YYYY-MM-DD</span>
+  category:         <span class="kw">string</span>;
+  totalCopies:      <span class="kw">number</span>;
+  availableCopies:  <span class="kw">number</span>;
+  issuedCopies:     <span class="kw">number</span>;
+  position:         <span class="kw">string</span>;        <span class="cm">// shelf location e.g. "A-101"</span>
+  addedDate:        <span class="kw">string</span>;
+  addedBy:          <span class="kw">string</span>;
+}</code></pre>
+    </div>
+
+    <!-- user.model.ts -->
+    <div class="code-file">
+      <div class="code-file-header">
+        <span class="code-file-name">app/models/user.model.ts</span>
+      </div>
+      <pre class="code-block"><code><span class="kw">export interface</span> <span class="type">User</span> {
+  id:                 <span class="kw">number</span>;
+  username:           <span class="kw">string</span>;
+  email:              <span class="kw">string</span>;
+  fullName:           <span class="kw">string</span>;
+  role:               <span class="str">'user'</span> | <span class="str">'librarian'</span>;
+  phone?:             <span class="kw">string</span>;
+  address?:           <span class="kw">string</span>;
+  maxBooksAllowed:    <span class="kw">number</span>;
+  currentBooksCount:  <span class="kw">number</span>;
+  totalFines:         <span class="kw">number</span>;
+  paidFines:          <span class="kw">number</span>;
+  isActive:           <span class="kw">boolean</span>;
+  joinDate:           <span class="kw">string</span>;        <span class="cm">// ISO 8601</span>
+  membershipExpiry:   <span class="kw">string</span>;        <span class="cm">// ISO 8601</span>
+}</code></pre>
+    </div>
+
+    <!-- issue.model.ts -->
+    <div class="code-file">
+      <div class="code-file-header">
+        <span class="code-file-name">app/models/issue.model.ts</span>
+      </div>
+      <pre class="code-block"><code><span class="kw">import</span> { Book } <span class="kw">from</span> <span class="str">'./book.model'</span>;
+
+<span class="kw">export interface</span> <span class="type">Issue</span> {
+  id:           <span class="kw">number</span>;
+  bookId:       <span class="kw">number</span>;
+  userId:       <span class="kw">number</span>;
+  issueDate:    <span class="kw">string</span>;                    <span class="cm">// ISO 8601</span>
+  dueDate:      <span class="kw">string</span>;                    <span class="cm">// ISO 8601</span>
+  returnDate:   <span class="kw">string</span> | <span class="kw">null</span>;
+  status:       <span class="str">'active'</span> | <span class="str">'returned'</span>;
+  renewCount:   <span class="kw">number</span>;                    <span class="cm">// max 2</span>
+  fine:         <span class="kw">number</span>;
+  finePaid:     <span class="kw">boolean</span>;
+  daysUntilDue: <span class="kw">number</span>;                    <span class="cm">// negative when overdue</span>
+  isOverdue:    <span class="kw">boolean</span>;
+  book?:        <span class="type">Pick</span>&lt;<span class="type">Book</span>, <span class="str">'id'</span> | <span class="str">'title'</span> | <span class="str">'author'</span> | <span class="str">'isbn'</span>&gt;;  <span class="cm">// populated in GET /api/issues/my</span>
+}</code></pre>
+    </div>
+
+    <!-- fine.model.ts -->
+    <div class="code-file">
+      <div class="code-file-header">
+        <span class="code-file-name">app/models/fine.model.ts</span>
+      </div>
+      <pre class="code-block"><code><span class="kw">export interface</span> <span class="type">Fine</span> {
+  issueId:    <span class="kw">number</span>;
+  bookId:     <span class="kw">number</span>;
+  book: {
+    id:       <span class="kw">number</span>;
+    title:    <span class="kw">string</span>;
+    author:   <span class="kw">string</span>;
+  };
+  issueDate:  <span class="kw">string</span>;
+  dueDate:    <span class="kw">string</span>;
+  returnDate: <span class="kw">string</span>;
+  daysOverdue:<span class="kw">number</span>;
+  fine:       <span class="kw">number</span>;
+  finePaid:   <span class="kw">boolean</span>;
+  status:     <span class="str">'active'</span> | <span class="str">'returned'</span>;
+}
+
+<span class="kw">export interface</span> <span class="type">FinesResponse</span> {
+  fines:        <span class="type">Fine</span>[];
+  totalFines:   <span class="kw">number</span>;
+  paidFines:    <span class="kw">number</span>;
+  pendingFines: <span class="kw">number</span>;
+}</code></pre>
+    </div>
+
+    <div class="callout info" style="margin-top: 1.4rem">
+      <span class="callout-title">Also useful — API response wrappers</span>
+      <p>Some endpoints return wrapper objects rather than bare arrays. Type these inline in your service methods rather than creating separate interfaces. For example, <code>getMyIssues()</code> returns <code>Observable&lt;&#123; issues: Issue[], summary: &#123; total: number, active: number, overdue: number, returned: number &#125; &#125;&gt;</code>. The login endpoint returns <code>Observable&lt;&#123; message: string, token: string, user: User &#125;&gt;</code>.</p>
+    </div>
+  </section>
+
+  <!-- ══ 6. MARKING RUBRIC ══ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">06</span>
+      <h2 class="section-title">Marking Rubric</h2>
+    </div>
+    <p>Each criterion is assessed as <em>Not attempted</em>, <em>Partial</em>, or <em>Complete</em>. The marks below are for a Complete.</p>
+
+    <table class="rubric">
+      <thead>
+        <tr>
+          <th>Area</th>
+          <th>What we look for</th>
+          <th style="text-align:right">Marks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Project setup &amp; structure</strong></td>
+          <td>Standalone components, correct folder layout, app.config.ts wires interceptors and router, no console errors on startup.</td>
+          <td class="marks" style="text-align:right">10</td>
+        </tr>
+        <tr>
+          <td><strong>Components &amp; Templates</strong></td>
+          <td>All required components exist; @Input/@Output used correctly; lifecycle hooks used appropriately; safe navigation operator present; no logic in templates beyond simple expressions.</td>
+          <td class="marks" style="text-align:right">15</td>
+        </tr>
+        <tr>
+          <td><strong>Directives</strong></td>
+          <td>*ngFor with trackBy everywhere; *ngIf/ngClass applied correctly; highlight.directive and role.directive both functional and used in templates.</td>
+          <td class="marks" style="text-align:right">10</td>
+        </tr>
+        <tr>
+          <td><strong>Services &amp; DI</strong></td>
+          <td>All four services exist and use HttpClient; BehaviorSubject in auth.service; session restored on app load; no HTTP calls in components.</td>
+          <td class="marks" style="text-align:right">15</td>
+        </tr>
+        <tr>
+          <td><strong>Pipes</strong></td>
+          <td>All three custom pipes implemented and used in templates; built-in date/currency/titlecase pipes present; no logic duplicated in components that belongs in a pipe.</td>
+          <td class="marks" style="text-align:right">10</td>
+        </tr>
+        <tr>
+          <td><strong>Forms</strong></td>
+          <td>Login/register use template-driven forms with visible validation messages; book-form uses reactive form with FormBuilder; patchValue works for edit mode; submit disabled when invalid.</td>
+          <td class="marks" style="text-align:right">15</td>
+        </tr>
+        <tr>
+          <td><strong>Routing</strong></td>
+          <td>All routes defined; loadComponent used for lazy loading; route parameter read via paramMap observable; routerLink / routerLinkActive in navbar; wildcard route present.</td>
+          <td class="marks" style="text-align:right">10</td>
+        </tr>
+        <tr>
+          <td><strong>HTTP &amp; RxJS</strong></td>
+          <td>HttpParams for search; debounceTime + distinctUntilChanged on search input; async pipe in at least one template; catchError + retry in book service; no raw .subscribe() without cleanup.</td>
+          <td class="marks" style="text-align:right">10</td>
+        </tr>
+        <tr>
+          <td><strong>Interceptors &amp; Guards</strong></td>
+          <td>auth.interceptor attaches token (but not on login/register); error.interceptor handles 401/403 and 500; auth.guard and librarian.guard both block correctly; registered in app.config.ts.</td>
+          <td class="marks" style="text-align:right">15</td>
+        </tr>
+        <tr>
+          <td><strong>Best practices</strong></td>
+          <td>OnPush on display components; no <em>any</em> types; takeUntil pattern in all manual subscriptions; no memory leaks.</td>
+          <td class="marks" style="text-align:right">10</td>
+        </tr>
+        <tr style="background: var(--ink); color: var(--paper);">
+          <td colspan="2" style="padding: 0.6rem 0.8rem; font-weight:600;">Total</td>
+          <td class="marks" style="text-align:right; color: #f5c842; padding: 0.6rem 0.8rem;">120</td>
+        </tr>
+        <tr>
+          <td><strong>BONUS — Librarian dashboard</strong></td>
+          <td>Functional dashboard showing stats from <em>/api/stats/dashboard</em>; overdue report from <em>/api/reports/overdue</em>; user activate/deactivate working.</td>
+          <td class="bonus" style="text-align:right">+10</td>
+        </tr>
+        <tr>
+          <td><strong>BONUS — RxJS search UX</strong></td>
+          <td>Search input observable uses <em>switchMap</em> to cancel in-flight requests; results update in real time without a submit button.</td>
+          <td class="bonus" style="text-align:right">+5</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══ 7. RULES ══ -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">07</span>
+      <h2 class="section-title">Rules &amp; Submission</h2>
+    </div>
+
+    <div class="callout rule">
+      <span class="callout-title">No-Code Rule</span>
+      <p>The task description above gives you the structure and the behaviour to implement. <strong>Do not paste solutions from the internet or use AI tools to write your implementation code.</strong> Understanding how each piece works is the entire point. During the code review, you may be asked to explain any part of your submission.</p>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-title">What to Submit</span>
+      <p>A single ZIP of your Angular project folder (excluding <code>node_modules</code>). Include a short <strong>README.md</strong> that explains how to run the project and lists any features you did not complete and why.</p>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-title">Common Pitfalls to Avoid</span>
+      <p><strong>Memory leaks</strong> — always unsubscribe. <strong>Logic in templates</strong> — keep templates declarative; use pipes or component methods instead. <strong>Calling HTTP in components</strong> — all HTTP must go through services. <strong>Hardcoded tokens</strong> — always read from localStorage via auth.service. <strong>Missing OnPush</strong> on display components will lose marks even if the app works.</p>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="doc-footer">
+    <span>Angular Library Manager — Student Task Brief</span>
+    <span>Standalone · Angular 17+ · API v2.0 · localhost:3001</span>
+  </footer>
+
+</div>
+</body>
+</html>

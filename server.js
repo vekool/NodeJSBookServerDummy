@@ -8,6 +8,16 @@ const RxJSSocketServer = require('./rxjs-socket-server');
 const { router: rxjsRoutes, setSocketServer } = require('./rxjs-demo-routes');
 const helpRoutes = require('./help-routes');
 
+// Import database and new routes
+const db = require('./database');
+const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+const issueRoutes = require('./routes/issue.routes');
+const fineRoutes = require('./routes/fine.routes');
+const bookRoutes = require('./routes/book.routes');
+const statsRoutes = require('./routes/stats.routes');
+const { clearAllTokens, authenticateToken, requireLibrarian } = require('./middleware/auth.middleware');
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -19,6 +29,12 @@ const io = new Server(server, {
 
 const PORT = 3001;
 const SECRET_KEY = 'your-secret-key-for-jwt';
+
+// Initialize database
+db.initializeDatabase().catch(error => {
+  console.error('Failed to initialize database:', error);
+  process.exit(1);
+});
 
 // Initialize RxJS Socket Server
 const rxjsSocketServer = new RxJSSocketServer(io);
@@ -32,124 +48,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files (HTML, CSS)
 app.use(express.static(__dirname));
 
-// Mock data - Initial books (simulating JSONPlaceholder posts format)
-//WHERE IS THIS USED, WHY IS IT HERE, WHAT WILL HAPPEN IF REMOVED
-//WHAT ROLE DOES IT PLAY IN THE OVERALL PROJECT
-let books = [
-  {
-    userId: 1,
-    id: 1,
-    title: "The Great Gatsby",
-    body: "A classic American novel set in the Jazz Age, exploring themes of wealth, love, and the American Dream."
-  },
-  {
-    userId: 2,
-    id: 2,
-    title: "To Kill a Mockingbird",
-    body: "A gripping tale of racial injustice and childhood innocence in the American South during the 1930s."
-  },
-  {
-    userId: 1,
-    id: 3,
-    title: "1984",
-    body: "A dystopian social science fiction novel exploring surveillance, propaganda, and totalitarianism."
-  },
-  {
-    userId: 3,
-    id: 4,
-    title: "Pride and Prejudice",
-    body: "A romantic novel of manners exploring issues of morality, education, and marriage in British society."
-  },
-  {
-    userId: 2,
-    id: 5,
-    title: "The Catcher in the Rye",
-    body: "A story about teenage rebellion and alienation, narrated by the iconic character Holden Caulfield."
-  },
-  {
-    userId: 4,
-    id: 6,
-    title: "The Hobbit",
-    body: "A fantasy novel following the quest of Bilbo Baggins, a hobbit who embarks on an epic adventure."
-  },
-  {
-    userId: 3,
-    id: 7,
-    title: "Harry Potter and the Philosopher's Stone",
-    body: "The beginning of a magical journey following a young wizard discovering his true identity and destiny."
-  },
-  {
-    userId: 1,
-    id: 8,
-    title: "The Lord of the Rings",
-    body: "An epic high-fantasy novel following the quest to destroy the One Ring and defeat the Dark Lord Sauron."
-  },
-  {
-    userId: 5,
-    id: 9,
-    title: "Animal Farm",
-    body: "An allegorical novella reflecting events leading up to the Russian Revolution and the Stalinist era."
-  },
-  {
-    userId: 2,
-    id: 10,
-    title: "Brave New World",
-    body: "A dystopian novel exploring a futuristic society driven by technological advancement and social conditioning."
-  }
-];
+// ==================== API v2 ROUTES ====================
 
-let nextId = 11;
-
-// Mock users for authentication
-const users = [
-  { username: 'admin', password: 'admin123' },
-  { username: 'user', password: 'user123' }
-];
-
-// Stored tokens (for logout functionality)
-let validTokens = new Set();
+// Mount v2 API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/issues', issueRoutes);
+app.use('/api/fines', fineRoutes);
+app.use('/api/books', bookRoutes);
+app.use('/api/stats', statsRoutes);
 
 // ==================== HELPER FUNCTIONS ====================
 
 // Simulate network delay
 const simulateDelay = (ms = 500) => {
   return new Promise(resolve => setTimeout(resolve, ms));
-};
-
-// Generate JWT token
-const generateToken = (username) => {
-  return jwt.sign({ username }, SECRET_KEY, { expiresIn: '2h' });
-};
-
-// Verify JWT token
-const verifyToken = (token) => {
-  try {
-    return jwt.verify(token, SECRET_KEY);
-  } catch (error) {
-    return null;
-  }
-};
-
-// Authentication middleware
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-  if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
-  }
-
-  if (!validTokens.has(token)) {
-    return res.status(403).json({ error: 'Invalid or expired token' });
-  }
-
-  const decoded = verifyToken(token);
-  if (!decoded) {
-    return res.status(403).json({ error: 'Invalid token' });
-  }
-
-  req.user = decoded;
-  next();
 };
 
 // ==================== ROOT ENDPOINT ====================
@@ -382,161 +295,226 @@ this.http.post('http://localhost:3001/rxjs/streams/stop-all', {}).subscribe();`
 // Mount help routes under /help prefix
 app.use('/help', helpRoutes);
 
-// ==================== AUTHENTICATION ENDPOINTS ====================
+// ==================== LEGACY ENDPOINTS (Backward Compatibility) ====================
 
-// Login endpoint
+// These endpoints maintain the original API contract for existing student projects
+// New projects should use /api/* endpoints
+
+// ==================== AUTHENTICATION ENDPOINTS (Legacy) ====================
+
+// Login endpoint - redirects to v2
 app.post('/auth/login', async (req, res) => {
   await simulateDelay(300);
   
-  const { username, password } = req.body;
-
-  // For testing purposes, accept any username/password
-  // In production, you would verify against the users array
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password required' });
+  // Delegate to the auth routes handler
+  const authRoutes = require('./routes/auth.routes');
+  // Call the v2 login logic
+  try {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password required' });
+    }
+    
+    // Find user by username or email
+    let user = await db.getUserByUsername(username);
+    if (!user) {
+      user = await db.getUserByEmail(username);
+    }
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    if (!user.isActive) {
+      return res.status(403).json({ error: 'Account is inactive' });
+    }
+    
+    // Validate password
+    const isValidPassword = await db.validatePassword(password, user.password);
+    
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    const { password: _, ...userWithoutPassword } = user;
+    const { generateToken, addToken } = require('./middleware/auth.middleware');
+    const token = generateToken(userWithoutPassword);
+    addToken(token);
+    
+    res.json({
+      message: 'Login successful',
+      token,
+      user: {
+        username: user.username // Legacy format
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed' });
   }
-
-  const token = generateToken(username);
-  validTokens.add(token);
-
-  res.json({
-    message: 'Login successful',
-    token,
-    user: { username }
-  });
 });
 
-// Logout endpoint
+// Logout endpoint - redirects to v2
 app.post('/auth/logout', authenticateToken, async (req, res) => {
   await simulateDelay(200);
-  
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (token) {
-    validTokens.delete(token);
-  }
-
+  const { removeToken } = require('./middleware/auth.middleware');
+  removeToken(req.token);
   res.json({ message: 'Logout successful' });
 });
 
-// Verify token endpoint
+// Verify token endpoint - redirects to v2
 app.get('/auth/verify', authenticateToken, async (req, res) => {
   res.json({ 
     valid: true, 
-    user: req.user 
+    user: { username: req.user.username } // Legacy format
   });
 });
 
-// ==================== BOOK ENDPOINTS (Public) ====================
+// ==================== BOOK ENDPOINTS (Legacy - Backward Compatible) ====================
 
-// GET /books - Get all books
+// GET /books - Get all books (returns compatible format)
 app.get('/books', async (req, res) => {
   await simulateDelay();
-  res.json(books);
+  try {
+    const books = await db.getAllBooks();
+    
+    // Return in original format for backward compatibility
+    const compatibleBooks = books.map(book => ({
+      userId: book.userId,
+      id: book.id,
+      title: book.title,
+      body: book.body
+    }));
+    
+    res.json(compatibleBooks);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch books' });
+  }
 });
 
-// GET /books/:id - Get single book
+// GET /books/:id - Get single book (returns compatible format)
 app.get('/books/:id', async (req, res) => {
   await simulateDelay();
-  
-  const id = parseInt(req.params.id);
-  const book = books.find(b => b.id === id);
-  
-  if (!book) {
-    return res.status(404).json({ error: 'Book not found' });
+  try {
+    const book = await db.getBookById(req.params.id);
+    
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    
+    // Return in original format for backward compatibility
+    res.json({
+      userId: book.userId,
+      id: book.id,
+      title: book.title,
+      body: book.body
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch book' });
   }
-  
-  res.json(book);
 });
-
-// ==================== BOOK ENDPOINTS (Protected) ====================
 
 // POST /books - Create new book (Protected)
 app.post('/books', authenticateToken, async (req, res) => {
   await simulateDelay();
-  
-  const { title, body, userId } = req.body;
-  
-  if (!title || !body) {
-    return res.status(400).json({ error: 'Title and body are required' });
+  try {
+    const { title, body, userId } = req.body;
+    
+    if (!title || !body) {
+      return res.status(400).json({ error: 'Title and body are required' });
+    }
+    
+    const newBook = await db.createBook({
+      title,
+      body,
+      userId: userId || 1,
+      addedBy: req.user.username
+    });
+    
+    // Return in original format for backward compatibility
+    res.status(201).json({
+      userId: newBook.userId,
+      id: newBook.id,
+      title: newBook.title,
+      body: newBook.body
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create book' });
   }
-  
-  const newBook = {
-    userId: userId || 1,
-    id: nextId++,
-    title,
-    body
-  };
-  
-  books.push(newBook);
-  
-  // Return 201 Created status
-  res.status(201).json(newBook);
 });
 
 // PUT /books/:id - Update book (Protected)
 app.put('/books/:id', authenticateToken, async (req, res) => {
   await simulateDelay();
-  
-  const id = parseInt(req.params.id);
-  const { title, body, userId } = req.body;
-  
-  const bookIndex = books.findIndex(b => b.id === id);
-  
-  if (bookIndex === -1) {
-    return res.status(404).json({ error: 'Book not found' });
+  try {
+    const { title, body, userId } = req.body;
+    
+    const updates = {};
+    if (title) updates.title = title;
+    if (body) updates.body = body;
+    if (userId) updates.userId = userId;
+    
+    const updatedBook = await db.updateBook(req.params.id, updates);
+    
+    // Return in original format for backward compatibility
+    res.json({
+      userId: updatedBook.userId,
+      id: updatedBook.id,
+      title: updatedBook.title,
+      body: updatedBook.body
+    });
+  } catch (error) {
+    if (error.message === 'Book not found') {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    res.status(500).json({ error: 'Failed to update book' });
   }
-  
-  // Update book
-  books[bookIndex] = {
-    ...books[bookIndex],
-    title: title || books[bookIndex].title,
-    body: body || books[bookIndex].body,
-    userId: userId || books[bookIndex].userId
-  };
-  
-  res.json(books[bookIndex]);
 });
 
 // PATCH /books/:id - Partially update book (Protected)
 app.patch('/books/:id', authenticateToken, async (req, res) => {
   await simulateDelay();
-  
-  const id = parseInt(req.params.id);
-  const updates = req.body;
-  
-  const bookIndex = books.findIndex(b => b.id === id);
-  
-  if (bookIndex === -1) {
-    return res.status(404).json({ error: 'Book not found' });
+  try {
+    const updates = {};
+    const { title, body, userId } = req.body;
+    
+    if (title !== undefined) updates.title = title;
+    if (body !== undefined) updates.body = body;
+    if (userId !== undefined) updates.userId = userId;
+    
+    const updatedBook = await db.updateBook(req.params.id, updates);
+    
+    // Return in original format for backward compatibility
+    res.json({
+      userId: updatedBook.userId,
+      id: updatedBook.id,
+      title: updatedBook.title,
+      body: updatedBook.body
+    });
+  } catch (error) {
+    if (error.message === 'Book not found') {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    res.status(500).json({ error: 'Failed to update book' });
   }
-  
-  // Partial update
-  books[bookIndex] = {
-    ...books[bookIndex],
-    ...updates,
-    id: books[bookIndex].id // Ensure id doesn't change
-  };
-  
-  res.json(books[bookIndex]);
 });
 
 // DELETE /books/:id - Delete book (Protected)
 app.delete('/books/:id', authenticateToken, async (req, res) => {
   await simulateDelay();
-  
-  const id = parseInt(req.params.id);
-  
-  const bookIndex = books.findIndex(b => b.id === id);
-  
-  if (bookIndex === -1) {
-    return res.status(404).json({ error: 'Book not found' });
+  try {
+    await db.deleteBook(req.params.id);
+    res.json({ message: 'Book deleted successfully', id: parseInt(req.params.id) });
+  } catch (error) {
+    if (error.message.includes('active issues')) {
+      return res.status(400).json({ error: 'Cannot delete book with active issues' });
+    }
+    if (error.message === 'Book not found') {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    res.status(500).json({ error: 'Failed to delete book' });
   }
-  
-  books.splice(bookIndex, 1);
-  
-  res.json({ message: 'Book deleted successfully', id });
 });
 
 // ==================== TESTING ENDPOINTS ====================
@@ -553,43 +531,20 @@ app.get('/error/timeout', async (req, res) => {
 });
 
 // Reset data endpoint (for testing)
-app.post('/reset', async (req, res) => {
-  books = [
-    {
-      userId: 1,
-      id: 1,
-      title: "The Great Gatsby",
-      body: "A classic American novel set in the Jazz Age, exploring themes of wealth, love, and the American Dream."
-    },
-    {
-      userId: 2,
-      id: 2,
-      title: "To Kill a Mockingbird",
-      body: "A gripping tale of racial injustice and childhood innocence in the American South during the 1930s."
-    },
-    {
-      userId: 1,
-      id: 3,
-      title: "1984",
-      body: "A dystopian social science fiction novel exploring surveillance, propaganda, and totalitarianism."
-    },
-    {
-      userId: 3,
-      id: 4,
-      title: "Pride and Prejudice",
-      body: "A romantic novel of manners exploring issues of morality, education, and marriage in British society."
-    },
-    {
-      userId: 2,
-      id: 5,
-      title: "The Catcher in the Rye",
-      body: "A story about teenage rebellion and alienation, narrated by the iconic character Holden Caulfield."
-    }
-  ];
-  nextId = 6;
-  validTokens.clear();
-  
-  res.json({ message: 'Data reset successfully' });
+app.post('/reset', authenticateToken, requireLibrarian, async (req, res) => {
+  try {
+    // Re-run the seed script to reset database
+    const seedDatabase = require('./scripts/seed-database');
+    await seedDatabase();
+    
+    res.json({ 
+      message: 'Database reset successfully',
+      info: 'All data has been reset to seed values'
+    });
+  } catch (error) {
+    console.error('Reset error:', error);
+    res.status(500).json({ error: 'Failed to reset database' });
+  }
 });
 
 // ==================== ERROR HANDLING ====================
@@ -608,55 +563,101 @@ app.use((err, req, res, next) => {
 // ==================== SERVER START ====================
 
 server.listen(PORT, () => {
-  console.log('='.repeat(50));
-  console.log('📚 Angular Book Server is running!');
-  console.log('='.repeat(50));
+  console.log('='.repeat(70));
+  console.log('📚 Angular Book Server v2.0 - Library Management System');
+  console.log('='.repeat(70));
   console.log(`🚀 Server: http://localhost:${PORT}`);
   console.log(`📖 API Documentation: http://localhost:${PORT}`);
   console.log('');
-  console.log('Available Endpoints:');
-  console.log('');
-  console.log('Documentation:');
-  console.log('  GET    /                 - API Documentation (HTML)');
+  console.log('=== LEGACY API (Backward Compatible) ===');
   console.log('');
   console.log('Authentication:');
-  console.log('  POST   /auth/login       - Login (any username/password)');
-  console.log('  POST   /auth/logout      - Logout (requires token)');
-  console.log('  GET    /auth/verify      - Verify token');
+  console.log('  POST   /auth/login              - Login (redirects to v2)');
+  console.log('  POST   /auth/logout             - Logout (requires token)');
+  console.log('  GET    /auth/verify             - Verify token');
   console.log('');
-  console.log('Books (Public):');
-  console.log('  GET    /books            - Get all books');
-  console.log('  GET    /books/:id        - Get single book');
+  console.log('Books:');
+  console.log('  GET    /books                   - Get all books (compatible format)');
+  console.log('  GET    /books/:id               - Get single book');
+  console.log('  POST   /books                   - Create book (protected)');
+  console.log('  PUT    /books/:id               - Update book (protected)');
+  console.log('  PATCH  /books/:id               - Partial update (protected)');
+  console.log('  DELETE /books/:id               - Delete book (protected)');
   console.log('');
-  console.log('Books (Protected - requires Authorization header):');
-  console.log('  POST   /books            - Create new book');
-  console.log('  PUT    /books/:id        - Update book');
-  console.log('  PATCH  /books/:id        - Partially update book');
-  console.log('  DELETE /books/:id        - Delete book');
+  console.log('=== V2 API (New Features) ===');
   console.log('');
-  console.log('Testing:');
-  console.log('  GET    /error/500        - Test 500 error');
-  console.log('  GET    /error/timeout    - Test timeout');
-  console.log('  POST   /reset            - Reset data to initial state');
+  console.log('Authentication (/api/auth):');
+  console.log('  POST   /api/auth/register       - Register new user');
+  console.log('  POST   /api/auth/login          - Login with hashed password');
+  console.log('  POST   /api/auth/logout         - Logout (protected)');
+  console.log('  GET    /api/auth/profile        - Get user profile (protected)');
+  console.log('  PUT    /api/auth/profile        - Update profile (protected)');
+  console.log('  PUT    /api/auth/change-password - Change password (protected)');
   console.log('');
-  console.log('RxJS Teaching (WebSocket Streams):');
-  console.log('  GET    /rxjs/streams              - Get active streams');
-  console.log('  POST   /rxjs/streams/start        - Start custom stream');
-  console.log('  POST   /rxjs/streams/stop/:name   - Stop a stream');
-  console.log('  POST   /rxjs/streams/stop-all     - Stop all streams');
-  console.log('  GET    /rxjs/presets              - Get preset configurations');
-  console.log('  POST   /rxjs/presets/:name        - Start preset stream');
-  console.log('  GET    /rxjs/operators-guide      - RxJS operators guide');
+  console.log('Book Management (/api/books):');
+  console.log('  GET    /api/books               - Get all books with full details');
+  console.log('  GET    /api/books/search        - Search books');
+  console.log('  GET    /api/books/categories    - Get categories');
+  console.log('  GET    /api/books/available     - Get available books');
+  console.log('  POST   /api/books/create        - Create book (librarian only)');
+  console.log('  PUT    /api/books/:id           - Update book (librarian only)');
+  console.log('  DELETE /api/books/:id           - Delete book (librarian only)');
   console.log('');
-  console.log('Help & Documentation:');
-  console.log('  GET    /help/sockets              - WebSocket & Socket.io guide');
+  console.log('Issue Management (/api/issues):');
+  console.log('  GET    /api/issues              - Get all issues (librarian)');
+  console.log('  GET    /api/issues/my           - Get my issues (protected)');
+  console.log('  GET    /api/issues/:id          - Get issue details');
+  console.log('  POST   /api/issues              - Borrow book (protected)');
+  console.log('  PUT    /api/issues/:id/return   - Return book (protected)');
+  console.log('  PUT    /api/issues/:id/renew    - Renew book (protected)');
   console.log('');
-  console.log('Socket.io:');
-  console.log('  📡 WebSocket Server: ws://localhost:' + PORT);
-  console.log('  📺 Demo Page: http://localhost:' + PORT + '/rxjs-demo.html');
+  console.log('Fine Management (/api/fines):');
+  console.log('  GET    /api/fines/user/:userId  - Get user fines');
+  console.log('  GET    /api/fines/my            - Get my fines (protected)');
+  console.log('  POST   /api/fines/:issueId/pay  - Pay fine (protected)');
   console.log('');
-  console.log('='.repeat(50));
-  console.log('💡 Tip: All protected endpoints require Bearer token');
-  console.log('   Example: Authorization: Bearer <your-token>');
-  console.log('='.repeat(50));
+  console.log('User Management (/api/users) - Librarian Only:');
+  console.log('  GET    /api/users               - Get all users');
+  console.log('  GET    /api/users/:id           - Get user details');
+  console.log('  PUT    /api/users/:id/activate  - Activate user');
+  console.log('  PUT    /api/users/:id/deactivate - Deactivate user');
+  console.log('  DELETE /api/users/:id           - Delete user');
+  console.log('');
+  console.log('Statistics (/api/stats) - Librarian Only:');
+  console.log('  GET    /api/stats/dashboard     - Dashboard statistics');
+  console.log('  GET    /api/reports/overdue     - Overdue books report');
+  console.log('  GET    /api/reports/popular     - Popular books report');
+  console.log('  GET    /api/reports/user-activity - User activity report');
+  console.log('');
+  console.log('=== TESTING & UTILITIES ===');
+  console.log('');
+  console.log('  GET    /error/500               - Test 500 error');
+  console.log('  GET    /error/timeout           - Test timeout');
+  console.log('  POST   /reset                   - Reset database (librarian only)');
+  console.log('');
+  console.log('=== RxJS Teaching (WebSocket Streams) ===');
+  console.log('');
+  console.log('  GET    /rxjs/streams            - Get active streams');
+  console.log('  POST   /rxjs/streams/start      - Start custom stream');
+  console.log('  POST   /rxjs/streams/stop/:name - Stop a stream');
+  console.log('  POST   /rxjs/streams/stop-all   - Stop all streams');
+  console.log('  GET    /rxjs/presets            - Get preset configurations');
+  console.log('  POST   /rxjs/presets/:name      - Start preset stream');
+  console.log('  GET    /rxjs/operators-guide    - RxJS operators guide');
+  console.log('  GET    /help/sockets            - WebSocket & Socket.io guide');
+  console.log('  📺 Demo: http://localhost:' + PORT + '/rxjs-demo.html');
+  console.log('');
+  console.log('='.repeat(70));
+  console.log('💡 Authentication:');
+  console.log('   - Protected endpoints require Bearer token');
+  console.log('   - Example: Authorization: Bearer <your-token>');
+  console.log('');
+  console.log('🔐 Default Users:');
+  console.log('   - Librarian: admin / admin123');
+  console.log('   - Users: user1, user2, user3 / user123');
+  console.log('');
+  console.log('📊 Database:');
+  console.log('   - JSON files in ./data/ directory');
+  console.log('   - Auto-seeded with 10 books and 4 users');
+  console.log('='.repeat(70));
 });
