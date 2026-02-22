@@ -32,9 +32,9 @@ router.get('/user/:userId', authenticateToken, async (req, res) => {
     const unpaidIssues = issuesWithFines.filter(issue => !issue.finePaid);
     
     res.json({
-      totalFines: user.totalFines,
+      totalFines: user.totalFines + user.paidFines, // lifetime amount ever accrued
       paidFines: user.paidFines,
-      unpaidFines: user.totalFines,
+      unpaidFines: user.totalFines,                 // current outstanding balance
       unpaidIssuesCount: unpaidIssues.length,
       issuesWithFines: await Promise.all(
         unpaidIssues.map(async (issue) => {

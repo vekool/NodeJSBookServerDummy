@@ -484,7 +484,7 @@
   "message": "Registration successful",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
-    "id": 104, "username": "newuser", "email": "newuser@example.com",
+    "id": 104, "username": "newuser", "email": "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="29474c5e5c5a4c5b694c51484459454c074a4644">[email&#160;protected]</a>",
     "fullName": "New User", "role": "user",
     "maxBooksAllowed": 3, "currentBooksCount": 0,
     "totalFines": 0, "paidFines": 0, "isActive": true,
@@ -523,7 +523,7 @@
   "message": "Login successful",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
-    "id": 100, "username": "admin", "email": "admin@example.com",
+    "id": 100, "username": "admin", "email": "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f4e4b4246416f4a574e425f434a014c4042">[email&#160;protected]</a>",
     "fullName": "Library Administrator", "role": "librarian",
     "maxBooksAllowed": 3, "currentBooksCount": 0,
     "totalFines": 0, "paidFines": 0, "isActive": true,
@@ -555,7 +555,7 @@
           <pre><code>Authorization: Bearer &lt;token&gt;</code></pre>
           <span class="field-label">Success Response — 200</span>
           <pre><code>{
-  "id": 101, "username": "user1", "email": "user1@example.com",
+  "id": 101, "username": "user1", "email": "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="92e7e1f7e0a3d2f7eaf3ffe2fef7bcf1fdff">[email&#160;protected]</a>",
   "fullName": "John Doe", "role": "user",
   "maxBooksAllowed": 3, "currentBooksCount": 2,
   "totalFines": 5.50, "paidFines": 0, "isActive": true,
@@ -818,7 +818,10 @@ curl "http://localhost:3001/api/books/search?q=gatsby"</code></pre>
         <div class="endpoint-body">
           <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Borrow a book. Due date is automatically set to 14 days from now.</p>
           <span class="field-label">Request Body</span>
-          <pre><code>{ "bookId": 1 }</code></pre>
+          <pre><code>{
+  "bookId": 1,
+  "userId": 101  // optional — librarians only; issues the book on behalf of another user
+}</code></pre>
           <span class="field-label">Success Response — 201</span>
           <pre><code>{
   "message": "Book issued successfully",
@@ -838,7 +841,7 @@ curl "http://localhost:3001/api/books/search?q=gatsby"</code></pre>
             <thead><tr><th>Status</th><th>Message</th></tr></thead>
             <tbody>
               <tr><td class="status-400">400</td><td>Book not available — all copies currently issued</td></tr>
-              <tr><td class="status-400">400</td><td>Cannot borrow more than 5 books at a time</td></tr>
+              <tr><td class="status-400">400</td><td>Cannot borrow more than 3 books at a time (or user's configured limit)</td></tr>
               <tr><td class="status-400">400</td><td>Cannot borrow books with overdue items</td></tr>
               <tr><td class="status-400">400</td><td>Cannot borrow books with unpaid fines exceeding $5</td></tr>
               <tr><td class="status-404">404</td><td>Book not found</td></tr>
@@ -920,7 +923,7 @@ curl "http://localhost:3001/api/books/search?q=gatsby"</code></pre>
   "dueDate": "2026-02-10T10:30:00.000Z",
   "currentFine": 2.00,
   "book": { "id": 1, "title": "The Great Gatsby" },
-  "user": { "id": 101, "username": "user1", "fullName": "John Doe", "email": "user1@example.com" }
+  "user": { "id": 101, "username": "user1", "fullName": "John Doe", "email": "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="54212731266514312c35392438317a373b39">[email&#160;protected]</a>" }
 }]</code></pre>
         </div>
       </div>
@@ -959,7 +962,7 @@ curl "http://localhost:3001/api/books/search?q=gatsby"</code></pre>
           <span class="auth-badge auth-yes">Auth Required</span>
         </div>
         <div class="endpoint-body">
-          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Extend the due date by 14 days. Maximum 2 renewals per issue. Overdue books cannot be renewed.</p>
+          <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Extend the due date by 7 days. Maximum 2 renewals per issue. Overdue books cannot be renewed.</p>
           <span class="field-label">Success Response — 200</span>
           <pre><code>{
   "message": "Book renewed successfully",
@@ -993,9 +996,9 @@ curl "http://localhost:3001/api/books/search?q=gatsby"</code></pre>
           <p style="font-size:0.83rem;color:var(--text-dim);margin-bottom:0.8rem">Get fine summary for a user. Users can only see their own fines; librarians can see anyone's.</p>
           <span class="field-label">Success Response — 200</span>
           <pre><code>{
-  "totalFines": 7.50,
+  "totalFines": 7.50,    // lifetime amount ever accrued (unpaid + paid)
   "paidFines": 0,
-  "unpaidFines": 7.50,
+  "unpaidFines": 7.50,   // current outstanding balance
   "unpaidIssuesCount": 1,
   "issuesWithFines": [
     {
@@ -1304,7 +1307,7 @@ curl "http://localhost:3001/api/books/search?q=gatsby"</code></pre>
     {
       "issueId": 1000,
       "book": { "id": 1, "title": "The Great Gatsby", "isbn": "978-0743273565" },
-      "user": { "id": 101, "username": "user1", "fullName": "John Doe", "email": "user1@example.com", "phone": "..." },
+      "user": { "id": 101, "username": "user1", "fullName": "John Doe", "email": "<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f88d8b9d8ac9b89d80999588949dd69b9795">[email&#160;protected]</a>", "phone": "..." },
       "issueDate": "2026-01-15", "dueDate": "2026-01-29",
       "daysOverdue": 16, "currentFine": 7.50, "finePaid": false
     }
@@ -1581,20 +1584,4 @@ npm run dev        # development mode with auto-reload</code></pre>
         </tbody>
       </table>
 
-      <span class="field-label" style="margin-top:1rem">V2 Full Workflow (Library Manager)</span>
-      <pre><code># 1. Login
-curl -X POST http://localhost:3001/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"user1","password":"user123"}'
-
-# 2. Save token from response, then get your issues:
-curl http://localhost:3001/api/issues \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"
-
-# 3. Borrow a book
-curl -X POST http://localhost:3001/api/issues \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -H "Content-Type: application/json" \
-  -d '{"bookId": 1}'</code></pre>
-
-      <span class="field-label" style="margin-top:1rem">Legacy Workflow (Earlier Boo
+      <span class="field-label" style="margin-top:1rem">V2 Full Workflow (Libr

@@ -81,6 +81,11 @@ async function authenticateToken(req, res, next) {
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 
+  // Check if token has been invalidated server-side (e.g. after logout)
+  if (!isTokenValid(token)) {
+    return res.status(403).json({ error: 'Token has been invalidated. Please log in again.' });
+  }
+
   // Get full user data from database
   try {
     const user = await db.getUserById(decoded.id);
