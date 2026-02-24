@@ -8,8 +8,6 @@ const router = express.Router();
 const db = require('../database');
 const { 
   generateToken, 
-  addToken, 
-  removeToken, 
   authenticateToken 
 } = require('../middleware/auth.middleware');
 
@@ -54,7 +52,6 @@ router.post('/register', async (req, res) => {
     
     // Generate token
     const token = generateToken(newUser);
-    addToken(token);
     
     res.status(201).json({
       message: 'Registration successful',
@@ -113,7 +110,6 @@ router.post('/login', async (req, res) => {
     
     // Generate token
     const token = generateToken(userWithoutPassword);
-    addToken(token);
     
     res.json({
       message: 'Login successful',
@@ -132,13 +128,9 @@ router.post('/login', async (req, res) => {
  * Logout and invalidate token
  */
 router.post('/logout', authenticateToken, (req, res) => {
-  try {
-    removeToken(req.token);
-    
-    res.json({ message: 'Logout successful' });
-  } catch (error) {
-    res.status(500).json({ error: 'Logout failed' });
-  }
+  // With self-validating JWTs there is no server-side invalidation.
+  // Clients should discard the token on logout.
+  res.json({ message: 'Logout successful' });
 });
 
 /**

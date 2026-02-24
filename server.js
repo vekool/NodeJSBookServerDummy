@@ -16,7 +16,7 @@ const issueRoutes = require('./routes/issue.routes');
 const fineRoutes = require('./routes/fine.routes');
 const bookRoutes = require('./routes/book.routes');
 const statsRoutes = require('./routes/stats.routes');
-const { clearAllTokens, authenticateToken, requireLibrarian } = require('./middleware/auth.middleware');
+const { authenticateToken, requireLibrarian } = require('./middleware/auth.middleware');
 
 const app = express();
 const server = http.createServer(app);
@@ -338,9 +338,8 @@ app.post('/auth/login', async (req, res) => {
     }
     
     const { password: _, ...userWithoutPassword } = user;
-    const { generateToken, addToken } = require('./middleware/auth.middleware');
+    const { generateToken } = require('./middleware/auth.middleware');
     const token = generateToken(userWithoutPassword);
-    addToken(token);
     
     res.json({
       message: 'Login successful',
@@ -358,8 +357,7 @@ app.post('/auth/login', async (req, res) => {
 // Logout endpoint - redirects to v2
 app.post('/auth/logout', authenticateToken, async (req, res) => {
   await simulateDelay(200);
-  const { removeToken } = require('./middleware/auth.middleware');
-  removeToken(req.token);
+  // No server-side token invalidation; clients should discard the token.
   res.json({ message: 'Logout successful' });
 });
 

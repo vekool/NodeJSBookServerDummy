@@ -8,8 +8,7 @@ const db = require('../database');
 
 const SECRET_KEY = 'your-secret-key-for-jwt';
 
-// Store for valid tokens (in-memory for simplicity)
-const validTokens = new Set();
+// Tokens are self-validating via JWT; no server-side token store is used.
 
 /**
  * Generate JWT token
@@ -38,30 +37,7 @@ function verifyToken(token) {
 /**
  * Add token to valid tokens set
  */
-function addToken(token) {
-  validTokens.add(token);
-}
-
-/**
- * Remove token from valid tokens set (logout)
- */
-function removeToken(token) {
-  validTokens.delete(token);
-}
-
-/**
- * Clear all tokens (for reset)
- */
-function clearAllTokens() {
-  validTokens.clear();
-}
-
-/**
- * Check if token is valid
- */
-function isTokenValid(token) {
-  return validTokens.has(token);
-}
+// server-side token management functions removed because JWTs are self-validating.
 
 /**
  * Middleware: Authenticate Token
@@ -81,10 +57,7 @@ async function authenticateToken(req, res, next) {
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 
-  // Check if token has been invalidated server-side (e.g. after logout)
-  if (!isTokenValid(token)) {
-    return res.status(403).json({ error: 'Token has been invalidated. Please log in again.' });
-  }
+  // Token is considered valid if signature and expiry checks pass.
 
   // Get full user data from database
   try {
@@ -171,10 +144,6 @@ async function optionalAuth(req, res, next) {
 module.exports = {
   generateToken,
   verifyToken,
-  addToken,
-  removeToken,
-  clearAllTokens,
-  isTokenValid,
   authenticateToken,
   requireLibrarian,
   requireActive,
